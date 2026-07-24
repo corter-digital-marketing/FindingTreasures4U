@@ -1,0 +1,82 @@
+// Prisma schema for Finding Treasures For You
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum Category {
+  FURNISHINGS
+  WEATHERVANES
+  COLLECTABLES
+  ARTWORKS
+}
+
+enum OrderStatus {
+  AWAITING_PAYMENT
+  PAID
+  FULFILLED
+  CANCELLED
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  category    Category
+  priceCents  Int
+  description String
+  condition   String?
+  dimensions  String?
+  featured    Boolean  @default(false)
+  sold        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  images     ProductImage[]
+  orderItems OrderItem[]
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  url       String
+  position  Int     @default(0)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id             String      @id @default(cuid())
+  status         OrderStatus @default(AWAITING_PAYMENT)
+  customerName   String
+  email          String
+  phone          String?
+  addressLine1   String
+  addressLine2   String?
+  city           String
+  region         String
+  postalCode     String
+  country        String
+  notes          String?
+  totalCents     Int
+  createdAt      DateTime    @default(now())
+
+  items OrderItem[]
+}
+
+model OrderItem {
+  id            String  @id @default(cuid())
+  orderId       String
+  productId     String?
+  nameSnapshot  String
+  priceCents    Int
+  quantity      Int     @default(1)
+
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+}

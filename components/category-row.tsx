@@ -1,0 +1,44 @@
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
+import { Container } from "@/components/ui/container";
+import { ProductCard, type ProductCardData } from "@/components/product-card";
+
+export function CategoryRow({
+  eyebrow,
+  title,
+  href,
+  products,
+}: {
+  eyebrow: string;
+  title: string;
+  href: string;
+  products: ProductCardData[];
+}) {
+  if (products.length === 0) return null;
+
+  return (
+    <section className="pb-20 md:pb-28">
+      <Container>
+        <div className="flex items-end justify-between mb-10">
+          <div>
+            <p className="text-[11px] tracking-[0.24em] uppercase text-bronze-dark mb-3">
+              {eyebrow}
+            </p>
+            <h2 className="font-serif-display text-3xl md:text-[2.5rem] text-charcoal">{title}</h2>
+          </div>
+          <Link
+            href={href}
+            className="link-underline hidden sm:inline-flex items-center gap-1.5 text-[12px] tracking-[0.14em] uppercase text-charcoal"
+          >
+            View All <ArrowUpRight className="w-3.5 h-3.5" strokeWidth={1.5} />
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
+          {products.map((p) => (
+            <ProductCard key={p.slug} product={p} />
+          ))}
+        </div>
+      </Container>
+    </section>
+  );
+}

@@ -1,8 +1,5 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
+import { put, del } from "@vercel/blob";
 import crypto from "node:crypto";
-
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 
 const EXTENSIONS: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -15,17 +12,23 @@ export async function saveUploadedImages(files: File[]): Promise<string[]> {
   const validFiles = files.filter((f) => f.size > 0 && EXTENSIONS[f.type]);
   if (validFiles.length === 0) return [];
 
-  await mkdir(UPLOAD_DIR, { recursive: true });
-
   const urls = await Promise.all(
     validFiles.map(async (file) => {
       const ext = EXTENSIONS[file.type];
       const filename = `${crypto.randomUUID()}.${ext}`;
-      const buffer = Buffer.from(await file.arrayBuffer());
-      await writeFile(path.join(UPLOAD_DIR, filename), buffer);
-      return `/uploads/${filename}`;
+      const blob = await put(`products/${filename}`, file, {
+        access: "public",
+        addRandomSuffix: false,
+      });
+      return blob.url;
     })
   );
 
   return urls;
+}
+
+export async function deleteUploadedImages(urls: string[]): Promise<void> {
+  const blobUrls = urls.filter((url) => url.includes(".blob.vercel-storage.com/"));
+  if (blobUrls.length === 0) return;
+  await del(blobUrls);
 }

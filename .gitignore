@@ -45,7 +45,3 @@ next-env.d.ts
 # local sqlite database
 *.db
 *.db-journal
-
-# admin-uploaded product photos (not code — back these up separately)
-/public/uploads/*
-!/public/uploads/.gitkeep

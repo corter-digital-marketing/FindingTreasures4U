@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { productSchema } from "@/lib/validation";
 import { generateUniqueSlug } from "@/lib/slug";
-import { saveUploadedImages } from "@/lib/uploads";
+import { saveUploadedImages, deleteUploadedImages } from "@/lib/uploads";
 
 type ActionState = { error: string } | null;
 
@@ -82,6 +82,8 @@ export async function updateProduct(
       ? existing.slug
       : await generateUniqueSlug(parsed.data.name, existing.id);
 
+  const removedImages = existing.images.filter((img) => removeIds.has(img.id));
+
   await prisma.$transaction(async (tx) => {
     if (removeIds.size > 0) {
       await tx.productImage.deleteMany({ where: { id: { in: [...removeIds] } } });
@@ -113,12 +115,23 @@ export async function updateProduct(
     }
   });
 
+  if (removedImages.length > 0) {
+    await deleteUploadedImages(removedImages.map((img) => img.url));
+  }
+
   revalidatePath("/", "layout");
   redirect(`/admin/products/${id}/edit?saved=1`);
 }
 
 export async function deleteProduct(id: string): Promise<void> {
+  const existing = await prisma.product.findUnique({
+    where: { id },
+    include: { images: true },
+  });
   await prisma.product.delete({ where: { id } });
+  if (existing && existing.images.length > 0) {
+    await deleteUploadedImages(existing.images.map((img) => img.url));
+  }
   revalidatePath("/", "layout");
   redirect("/admin/products");
 }

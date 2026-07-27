@@ -1,11 +1,11 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { productSchema } from "@/lib/validation";
 import { generateUniqueSlug } from "@/lib/slug";
 import { saveUploadedImages, deleteUploadedImages } from "@/lib/uploads";
+import { safeRevalidatePath } from "@/lib/revalidate";
 
 type ActionState = { error: string } | null;
 
@@ -51,7 +51,7 @@ export async function createProduct(
     },
   });
 
-  revalidatePath("/", "layout");
+  safeRevalidatePath("/", "layout");
   redirect(`/admin/products/${product.id}/edit?created=1`);
 }
 
@@ -119,7 +119,7 @@ export async function updateProduct(
     await deleteUploadedImages(removedImages.map((img) => img.url));
   }
 
-  revalidatePath("/", "layout");
+  safeRevalidatePath("/", "layout");
   redirect(`/admin/products/${id}/edit?saved=1`);
 }
 
@@ -132,6 +132,6 @@ export async function deleteProduct(id: string): Promise<void> {
   if (existing && existing.images.length > 0) {
     await deleteUploadedImages(existing.images.map((img) => img.url));
   }
-  revalidatePath("/", "layout");
+  safeRevalidatePath("/", "layout");
   redirect("/admin/products");
 }

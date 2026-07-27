@@ -1,8 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { checkoutSchema } from "@/lib/validation";
+import { safeRevalidatePath } from "@/lib/revalidate";
 
 export async function submitOrder(
   input: unknown
@@ -53,7 +53,7 @@ export async function submitOrder(
     return created;
   });
 
-  revalidatePath("/", "layout");
+  safeRevalidatePath("/", "layout");
 
   return { orderId: order.id };
 }

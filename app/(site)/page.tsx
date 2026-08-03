@@ -17,19 +17,8 @@ export default async function HomePage() {
   return (
     <div>
       {/* Editorial hero */}
-      <section className="relative h-[56vh] min-h-[420px] max-h-[620px] w-full overflow-hidden">
-        <Image
-          src="https://placehold.co/2400x1500/2a2118/e9dfc9.png?text=Finding+Treasures&font=playfair-display"
-          alt="A sun-lit interior styled with curated antique furnishings"
-          fill
-          priority
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-charcoal/10 to-transparent" />
+      <section className="relative h-[56vh] min-h-[420px] max-h-[620px] w-full overflow-hidden bg-charcoal">
         <Container className="relative h-full flex flex-col justify-end pb-12 md:pb-16">
-          <p className="text-[11px] tracking-[0.28em] uppercase text-ivory/70 mb-5">
-            Est. Curators of Fine Antiques
-          </p>
           <h1 className="font-serif-display text-ivory text-[2.25rem] leading-[1.05] sm:text-[2.75rem] md:text-[3.25rem] max-w-3xl">
             Antiques, uniques, and sought after items.
           </h1>

@@ -51,8 +51,7 @@ export function SiteFooter() {
             </li>
           </ul>
           <p className="mt-4 text-[12px] leading-relaxed text-ivory/50 max-w-[26ch]">
-            Ships fully insured, worldwide. Fourteen days to decide — full refund if a piece
-            isn&apos;t right.
+            Ships fully insured, worldwide.
           </p>
         </div>
 

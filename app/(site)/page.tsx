@@ -44,25 +44,25 @@ export default async function HomePage() {
       </section>
 
       {/* Shop by category — 2x2 grid */}
-      <section className="py-20 md:py-28">
+      <section className="py-14 md:py-20">
         <Container>
-          <div className="flex items-end justify-between mb-10">
+          <div className="flex items-end justify-between mb-6">
             <div>
-              <p className="text-[11px] tracking-[0.24em] uppercase text-bronze-dark mb-3">
+              <p className="text-[10px] tracking-[0.24em] uppercase text-bronze-dark mb-2">
                 Browse the Collection
               </p>
-              <h2 className="font-serif-display text-3xl md:text-[2.5rem] text-charcoal">
+              <h2 className="font-serif-display text-2xl md:text-[2rem] text-charcoal">
                 Shop by Category
               </h2>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
             {CATEGORIES.map((cat, i) => (
               <Link
                 key={cat.slug}
                 href={`/products/${cat.slug}`}
-                className="group relative img-zoom block overflow-hidden aspect-[16/12]"
+                className="group relative img-zoom block overflow-hidden aspect-[16/9]"
               >
                 {categoryImages[i] ? (
                   <Image
@@ -76,10 +76,10 @@ export default async function HomePage() {
                   <div className="w-full h-full bg-ivory-dim" />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-charcoal/70 via-charcoal/0 to-transparent" />
-                <div className="absolute left-6 bottom-6 flex items-center gap-2 text-ivory">
-                  <span className="font-serif-display text-2xl">{cat.label}</span>
+                <div className="absolute left-4 bottom-4 flex items-center gap-1.5 text-ivory">
+                  <span className="font-serif-display text-lg">{cat.label}</span>
                   <ArrowUpRight
-                    className="w-5 h-5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"
+                    className="w-4 h-4 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"
                     strokeWidth={1.5}
                   />
                 </div>
@@ -90,14 +90,14 @@ export default async function HomePage() {
       </section>
 
       {/* New arrivals */}
-      <section className="pb-20 md:pb-28">
+      <section className="pb-14 md:pb-20">
         <Container>
-          <div className="flex items-end justify-between mb-10">
+          <div className="flex items-end justify-between mb-6">
             <div>
-              <p className="text-[11px] tracking-[0.24em] uppercase text-bronze-dark mb-3">
+              <p className="text-[10px] tracking-[0.24em] uppercase text-bronze-dark mb-2">
                 Just In
               </p>
-              <h2 className="font-serif-display text-3xl md:text-[2.5rem] text-charcoal">
+              <h2 className="font-serif-display text-2xl md:text-[2rem] text-charcoal">
                 New Arrivals
               </h2>
             </div>
@@ -108,7 +108,7 @@ export default async function HomePage() {
               View All <ArrowUpRight className="w-3.5 h-3.5" strokeWidth={1.5} />
             </Link>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-5 gap-y-8">
             {newArrivals.map((p, i) => (
               <ProductCard key={p.slug} product={p} priority={i < 2} />
             ))}
@@ -128,8 +128,8 @@ export default async function HomePage() {
       ))}
 
       {/* About */}
-      <section id="about" className="py-20 md:py-28">
-        <Container className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center">
+      <section id="about" className="py-14 md:py-20">
+        <Container className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="relative aspect-[4/5] order-2 md:order-1">
             <Image
               src="https://placehold.co/1000x1250/e9e0cb/352a20.png?text=Our+Workshop&font=playfair-display"
@@ -140,26 +140,26 @@ export default async function HomePage() {
             />
           </div>
           <div className="order-1 md:order-2 max-w-lg">
-            <p className="text-[11px] tracking-[0.24em] uppercase text-bronze-dark mb-3">
+            <p className="text-[10px] tracking-[0.24em] uppercase text-bronze-dark mb-2">
               About Us
             </p>
-            <h2 className="font-serif-display text-3xl md:text-[2.5rem] text-charcoal leading-tight">
+            <h2 className="font-serif-display text-2xl md:text-[2rem] text-charcoal leading-tight">
               A lifelong eye for what deserves a second life.
             </h2>
-            <p className="mt-6 text-[15px] leading-relaxed text-charcoal-soft">
+            <p className="mt-5 text-[14px] leading-relaxed text-charcoal-soft">
               Finding Treasures 4 U began as a single stall at a Saturday estate sale and grew
               into a trusted source for authenticated antiques, folk art, and fine collectables.
               We personally research the history of every piece we offer — its maker, its era, its
               condition — so you can buy with confidence, wherever you are.
             </p>
-            <p className="mt-4 text-[15px] leading-relaxed text-charcoal-soft">
+            <p className="mt-3 text-[14px] leading-relaxed text-charcoal-soft">
               Each item is cleaned, assessed, and carefully packed by hand before it leaves our
               workshop, and we&apos;re always happy to answer questions about provenance or condition
               before you buy.
             </p>
             <Link
               href="/products"
-              className="link-underline mt-8 inline-flex items-center gap-1.5 text-[13px] tracking-[0.14em] uppercase text-charcoal"
+              className="link-underline mt-6 inline-flex items-center gap-1.5 text-[13px] tracking-[0.14em] uppercase text-charcoal"
             >
               Browse the Collection <ArrowUpRight className="w-4 h-4" strokeWidth={1.5} />
             </Link>

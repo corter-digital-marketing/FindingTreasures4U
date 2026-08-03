@@ -41,10 +41,10 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-sm">
         <Link href="/" className="flex flex-col items-center leading-none mb-10">
           <span className="font-serif-display text-2xl text-charcoal">
-            Finding <em className="italic text-bronze-dark">Treasures</em>
+            Finding <em className="italic text-bronze-dark">Treasures</em> 4 U
           </span>
           <span className="text-[10px] tracking-[0.32em] uppercase text-charcoal-soft mt-1">
-            4 U
+            Lock Haven, PA
           </span>
         </Link>
 

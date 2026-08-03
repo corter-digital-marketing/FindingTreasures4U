@@ -35,10 +35,10 @@ export function SiteHeader() {
           <div className="flex items-center justify-between py-5">
             <Link href="/" className="flex flex-col leading-none group min-w-0">
               <span className="font-serif-display text-[21px] sm:text-[26px] md:text-[28px] text-charcoal whitespace-nowrap">
-                Finding <em className="italic text-bronze-dark">Treasures</em>
+                Finding <em className="italic text-bronze-dark">Treasures</em> 4 U
               </span>
               <span className="text-[9px] sm:text-[10px] tracking-[0.28em] sm:tracking-[0.32em] uppercase text-charcoal-soft mt-1">
-                4 U
+                Lock Haven, PA
               </span>
             </Link>
 

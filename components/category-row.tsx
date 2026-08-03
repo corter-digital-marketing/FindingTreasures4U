@@ -17,14 +17,14 @@ export function CategoryRow({
   if (products.length === 0) return null;
 
   return (
-    <section className="pb-20 md:pb-28">
+    <section className="pb-14 md:pb-20">
       <Container>
-        <div className="flex items-end justify-between mb-10">
+        <div className="flex items-end justify-between mb-6">
           <div>
-            <p className="text-[11px] tracking-[0.24em] uppercase text-bronze-dark mb-3">
+            <p className="text-[10px] tracking-[0.24em] uppercase text-bronze-dark mb-2">
               {eyebrow}
             </p>
-            <h2 className="font-serif-display text-3xl md:text-[2.5rem] text-charcoal">{title}</h2>
+            <h2 className="font-serif-display text-2xl md:text-[2rem] text-charcoal">{title}</h2>
           </div>
           <Link
             href={href}
@@ -33,7 +33,7 @@ export function CategoryRow({
             View All <ArrowUpRight className="w-3.5 h-3.5" strokeWidth={1.5} />
           </Link>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-5 gap-y-8">
           {products.map((p) => (
             <ProductCard key={p.slug} product={p} />
           ))}

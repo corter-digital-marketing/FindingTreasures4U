@@ -43,14 +43,14 @@ export function ProductCard({
           </div>
         )}
       </div>
-      <div className="mt-4">
-        <p className="text-[10px] tracking-[0.16em] uppercase text-bronze-dark mb-1.5">
+      <div className="mt-3">
+        <p className="text-[9px] tracking-[0.16em] uppercase text-bronze-dark mb-1">
           {categoryLabel(product.category)}
         </p>
-        <h3 className="font-serif-display text-[19px] leading-snug text-charcoal group-hover:text-oxblood transition-colors">
+        <h3 className="font-serif-display text-[16px] leading-snug text-charcoal group-hover:text-oxblood transition-colors">
           {product.name}
         </h3>
-        <p className="mt-1.5 text-[15px] text-charcoal-soft tabular-nums">
+        <p className="mt-1 text-[13px] text-charcoal-soft tabular-nums">
           {formatPrice(product.priceCents)}
         </p>
       </div>

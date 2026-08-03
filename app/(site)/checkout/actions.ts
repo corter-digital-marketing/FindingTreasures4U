@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { checkoutSchema } from "@/lib/validation";
 import { safeRevalidatePath } from "@/lib/revalidate";
+import { sendOrderConfirmationToCustomer, sendOrderNotificationToOwner } from "@/lib/email";
 
 export async function submitOrder(
   input: unknown
@@ -43,6 +44,7 @@ export async function submitOrder(
           })),
         },
       },
+      include: { items: true },
     });
 
     await tx.product.updateMany({
@@ -54,6 +56,11 @@ export async function submitOrder(
   });
 
   safeRevalidatePath("/", "layout");
+
+  await Promise.all([
+    sendOrderNotificationToOwner(order),
+    sendOrderConfirmationToCustomer(order),
+  ]);
 
   return { orderId: order.id };
 }

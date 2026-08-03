@@ -1,4 +1,4 @@
-// Prisma schema for Finding Treasures For You
+// Prisma schema for Finding Treasures 4 U
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {

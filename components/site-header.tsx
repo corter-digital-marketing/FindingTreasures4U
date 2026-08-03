@@ -38,7 +38,7 @@ export function SiteHeader() {
                 Finding <em className="italic text-bronze-dark">Treasures</em>
               </span>
               <span className="text-[9px] sm:text-[10px] tracking-[0.28em] sm:tracking-[0.32em] uppercase text-charcoal-soft mt-1">
-                For You
+                4 U
               </span>
             </Link>
 

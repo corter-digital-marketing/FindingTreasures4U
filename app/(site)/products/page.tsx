@@ -4,7 +4,7 @@ import { ProductCard } from "@/components/product-card";
 import { getAllProducts } from "@/lib/products";
 
 export const metadata: Metadata = {
-  title: "All Products | Finding Treasures For You",
+  title: "All Products | Finding Treasures 4 U",
   description:
     "Browse our full collection of authenticated antiques, furnishings, weathervanes, and collectables.",
 };

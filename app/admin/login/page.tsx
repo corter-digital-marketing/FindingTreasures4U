@@ -44,7 +44,7 @@ export default function AdminLoginPage() {
             Finding <em className="italic text-bronze-dark">Treasures</em>
           </span>
           <span className="text-[10px] tracking-[0.32em] uppercase text-charcoal-soft mt-1">
-            For You
+            4 U
           </span>
         </Link>
 

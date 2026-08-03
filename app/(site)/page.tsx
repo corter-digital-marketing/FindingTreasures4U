@@ -133,7 +133,7 @@ export default async function HomePage() {
           <div className="relative aspect-[4/5] order-2 md:order-1">
             <Image
               src="https://placehold.co/1000x1250/e9e0cb/352a20.png?text=Our+Workshop&font=playfair-display"
-              alt="The Finding Treasures For You workshop"
+              alt="The Finding Treasures 4 U workshop"
               fill
               className="object-cover"
               sizes="(min-width: 768px) 50vw, 100vw"
@@ -147,7 +147,7 @@ export default async function HomePage() {
               A lifelong eye for what deserves a second life.
             </h2>
             <p className="mt-6 text-[15px] leading-relaxed text-charcoal-soft">
-              Finding Treasures For You began as a single stall at a Saturday estate sale and grew
+              Finding Treasures 4 U began as a single stall at a Saturday estate sale and grew
               into a trusted source for authenticated antiques, folk art, and fine collectables.
               We personally research the history of every piece we offer — its maker, its era, its
               condition — so you can buy with confidence, wherever you are.

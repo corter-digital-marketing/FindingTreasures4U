@@ -29,7 +29,7 @@ export async function generateMetadata({
   const category = categoryBySlug(slug);
   if (!category) return {};
   return {
-    title: `${category.label} | Finding Treasures For You`,
+    title: `${category.label} | Finding Treasures 4 U`,
     description: DESCRIPTIONS[category.slug],
   };
 }

@@ -68,7 +68,7 @@ export function SiteFooter() {
 
       <div className="border-t border-ivory/10">
         <div className="mx-auto max-w-[1400px] px-6 md:px-10 lg:px-14 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] tracking-[0.08em] text-ivory/45">
-          <span>&copy; {new Date().getFullYear()} Finding Treasures For You. All rights reserved.</span>
+          <span>&copy; {new Date().getFullYear()} Finding Treasures 4 U. All rights reserved.</span>
           <span>Every piece hand-selected, one estate at a time.</span>
         </div>
       </div>

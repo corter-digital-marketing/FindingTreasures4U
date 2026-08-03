@@ -18,7 +18,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Finding Treasures For You | Antiques, Uniques & Sought After Items",
+  title: "Finding Treasures 4 U | Antiques, Uniques & Sought After Items",
   description:
     "A curated online antiques shop offering authenticated furnishings, weathervanes, and collectables — carefully packed and shipped worldwide.",
 };

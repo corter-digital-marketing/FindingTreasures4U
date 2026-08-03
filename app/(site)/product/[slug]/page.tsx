@@ -19,7 +19,7 @@ export async function generateMetadata({
   const product = await getProductBySlug(slug);
   if (!product) return {};
   return {
-    title: `${product.name} | Finding Treasures For You`,
+    title: `${product.name} | Finding Treasures 4 U`,
     description: product.description,
   };
 }

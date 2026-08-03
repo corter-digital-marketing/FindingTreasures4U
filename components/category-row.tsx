@@ -4,12 +4,10 @@ import { Container } from "@/components/ui/container";
 import { ProductCard, type ProductCardData } from "@/components/product-card";
 
 export function CategoryRow({
-  eyebrow,
   title,
   href,
   products,
 }: {
-  eyebrow: string;
   title: string;
   href: string;
   products: ProductCardData[];
@@ -21,9 +19,6 @@ export function CategoryRow({
       <Container>
         <div className="flex items-end justify-between mb-6">
           <div>
-            <p className="text-[10px] tracking-[0.24em] uppercase text-bronze-dark mb-2">
-              {eyebrow}
-            </p>
             <h2 className="font-serif-display text-2xl md:text-[2rem] text-charcoal">{title}</h2>
           </div>
           <Link

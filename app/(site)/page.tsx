@@ -120,7 +120,6 @@ export default async function HomePage() {
       {CATEGORIES.map((cat, i) => (
         <CategoryRow
           key={cat.slug}
-          eyebrow="Shop the Category"
           title={cat.label}
           href={`/products/${cat.slug}`}
           products={categoryProducts[i]}
@@ -144,18 +143,12 @@ export default async function HomePage() {
               About Us
             </p>
             <h2 className="font-serif-display text-2xl md:text-[2rem] text-charcoal leading-tight">
-              A lifelong eye for what deserves a second life.
+              Antiques, uniques, and sought after items.
             </h2>
             <p className="mt-5 text-[14px] leading-relaxed text-charcoal-soft">
-              Finding Treasures 4 U began as a single stall at a Saturday estate sale and grew
-              into a trusted source for authenticated antiques, folk art, and fine collectables.
-              We personally research the history of every piece we offer — its maker, its era, its
-              condition — so you can buy with confidence, wherever you are.
-            </p>
-            <p className="mt-3 text-[14px] leading-relaxed text-charcoal-soft">
-              Each item is cleaned, assessed, and carefully packed by hand before it leaves our
-              workshop, and we&apos;re always happy to answer questions about provenance or condition
-              before you buy.
+              Finding Treasures 4 U, located at 346 East Main Street in Lock Haven, offers
+              antiques, uniques, and hard to find items. Every item has a story. From antique
+              furniture to remarkable artworks, Finding Treasures has something for you.
             </p>
             <Link
               href="/products"

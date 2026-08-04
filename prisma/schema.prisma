@@ -51,31 +51,34 @@ model ProductImage {
 }
 
 model Order {
-  id             String      @id @default(cuid())
-  status         OrderStatus @default(AWAITING_PAYMENT)
-  customerName   String
-  email          String
-  phone          String?
-  addressLine1   String
-  addressLine2   String?
-  city           String
-  region         String
-  postalCode     String
-  country        String
-  notes          String?
-  totalCents     Int
-  createdAt      DateTime    @default(now())
+  id                      String      @id @default(cuid())
+  status                  OrderStatus @default(AWAITING_PAYMENT)
+  customerName            String
+  email                   String
+  phone                   String?
+  addressLine1            String
+  addressLine2            String?
+  city                    String
+  region                  String
+  postalCode              String
+  country                 String
+  notes                   String?
+  totalCents              Int
+  stripeCheckoutSessionId String?     @unique
+  stripePaymentIntentId   String?
+  paidAt                  DateTime?
+  createdAt               DateTime    @default(now())
 
   items OrderItem[]
 }
 
 model OrderItem {
-  id            String  @id @default(cuid())
-  orderId       String
-  productId     String?
-  nameSnapshot  String
-  priceCents    Int
-  quantity      Int     @default(1)
+  id           String  @id @default(cuid())
+  orderId      String
+  productId    String?
+  nameSnapshot String
+  priceCents   Int
+  quantity     Int     @default(1)
 
   order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)

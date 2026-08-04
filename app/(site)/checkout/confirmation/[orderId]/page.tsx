@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Clock } from "lucide-react";
 import { Container } from "@/components/ui/container";
+import { ClearCartOnMount } from "@/components/clear-cart-on-mount";
 import { prisma } from "@/lib/prisma";
 import { formatPrice, formatDate } from "@/lib/format";
 
@@ -18,20 +19,47 @@ export default async function OrderConfirmationPage({
 
   if (!order) notFound();
 
+  // Stripe's webhook is what actually confirms payment, and it can arrive
+  // a beat after the browser redirect back here — so this page shouldn't
+  // assume "paid" just because the customer reached it.
+  const isPaid = order.status === "PAID" || order.status === "FULFILLED";
+
   return (
     <Container className="py-20 md:py-28 max-w-2xl">
-      <CheckCircle2 className="w-9 h-9 text-bronze-dark mb-6" strokeWidth={1.25} />
-      <p className="text-[11px] tracking-[0.24em] uppercase text-bronze-dark mb-3">
-        Request Received
-      </p>
-      <h1 className="font-serif-display text-4xl md:text-[3rem] text-charcoal leading-tight">
-        Thank you, {order.customerName.split(" ")[0]}.
-      </h1>
-      <p className="mt-5 text-[15px] leading-relaxed text-charcoal-soft">
-        We&apos;ve reserved the pieces below and received your shipping details. Our team will
-        email you at <span className="text-charcoal">{order.email}</span> within one business day
-        to confirm secure payment and arrange packing and shipping.
-      </p>
+      {isPaid && <ClearCartOnMount />}
+
+      {isPaid ? (
+        <>
+          <CheckCircle2 className="w-9 h-9 text-bronze-dark mb-6" strokeWidth={1.25} />
+          <p className="text-[11px] tracking-[0.24em] uppercase text-bronze-dark mb-3">
+            Payment Confirmed
+          </p>
+          <h1 className="font-serif-display text-4xl md:text-[3rem] text-charcoal leading-tight">
+            Thank you, {order.customerName.split(" ")[0]}.
+          </h1>
+          <p className="mt-5 text-[15px] leading-relaxed text-charcoal-soft">
+            Your payment has been received and the piece{order.items.length > 1 ? "s" : ""} below
+            are reserved for you. A confirmation has been sent to{" "}
+            <span className="text-charcoal">{order.email}</span>, and we&apos;ll be in touch to
+            arrange shipping.
+          </p>
+        </>
+      ) : (
+        <>
+          <Clock className="w-9 h-9 text-bronze-dark mb-6" strokeWidth={1.25} />
+          <p className="text-[11px] tracking-[0.24em] uppercase text-bronze-dark mb-3">
+            Confirming Payment
+          </p>
+          <h1 className="font-serif-display text-4xl md:text-[3rem] text-charcoal leading-tight">
+            Almost there, {order.customerName.split(" ")[0]}.
+          </h1>
+          <p className="mt-5 text-[15px] leading-relaxed text-charcoal-soft">
+            We&apos;re confirming your payment now — this usually takes just a few seconds. Refresh
+            this page in a moment, or check <span className="text-charcoal">{order.email}</span>{" "}
+            for a confirmation email once it clears.
+          </p>
+        </>
+      )}
 
       <div className="mt-10 border-t border-line">
         {order.items.map((item) => (
@@ -44,7 +72,7 @@ export default async function OrderConfirmationPage({
           </div>
         ))}
         <div className="flex items-center justify-between py-4 text-[15px]">
-          <span className="text-charcoal">Subtotal</span>
+          <span className="text-charcoal">Total</span>
           <span className="text-charcoal tabular-nums">{formatPrice(order.totalCents)}</span>
         </div>
       </div>

@@ -3,7 +3,6 @@
 import { useState, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Field, TextAreaField } from "@/components/ui/field";
@@ -13,8 +12,7 @@ import { formatPrice } from "@/lib/format";
 import { submitOrder } from "./actions";
 
 export default function CheckoutPage() {
-  const { items, subtotalCents, ready, clear } = useCart();
-  const router = useRouter();
+  const { items, subtotalCents, ready } = useCart();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,15 +37,18 @@ export default function CheckoutPage() {
     };
 
     const result = await submitOrder(payload);
-    setSubmitting(false);
 
     if ("error" in result) {
+      setSubmitting(false);
       setError(result.error);
       return;
     }
 
-    clear();
-    router.push(`/checkout/confirmation/${result.orderId}`);
+    // Don't clear the cart yet — the customer hasn't paid until they
+    // complete Stripe's page. The cart only empties once the confirmation
+    // page confirms the order actually paid (see ClearCartOnMount there).
+    // Full navigation (not router.push) since this leaves our domain.
+    window.location.href = result.checkoutUrl;
   }
 
   if (ready && items.length === 0) {
@@ -72,7 +73,7 @@ export default function CheckoutPage() {
         Secure Checkout
       </p>
       <h1 className="font-serif-display text-4xl md:text-[3rem] text-charcoal mb-10">
-        Request to Purchase
+        Checkout
       </h1>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-12">
@@ -170,11 +171,11 @@ export default function CheckoutPage() {
             )}
 
             <Button type="submit" disabled={submitting || !ready} className="w-full mt-6">
-              {submitting ? "Submitting…" : "Request to Purchase"}
+              {submitting ? "Redirecting to payment…" : "Continue to Payment"}
             </Button>
             <p className="mt-4 text-[11px] leading-relaxed text-charcoal-soft">
-              This reserves your selected pieces. We&apos;ll email you shortly to confirm secure
-              payment and finalize shipping — no payment is collected on this page.
+              You&apos;ll securely enter your card details on the next page via Stripe. Your card
+              is charged once payment completes there.
             </p>
           </div>
         </div>

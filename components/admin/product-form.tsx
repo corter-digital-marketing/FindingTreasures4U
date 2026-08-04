@@ -9,6 +9,7 @@ import { Trash2 } from "lucide-react";
 import { Field, TextAreaField } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { CATEGORIES } from "@/lib/categories";
+import { resizeImageForUpload } from "@/lib/client-image-resize";
 import type { Category } from "@/app/generated/prisma";
 
 type ActionState = { error: string } | { redirectTo: string } | null;
@@ -76,12 +77,19 @@ export function ProductForm({
     try {
       if (files.length > 0) {
         for (let i = 0; i < files.length; i++) {
-          const file = files[i];
+          setStatus(
+            files.length > 1 ? `Preparing photo ${i + 1} of ${files.length}…` : "Preparing photo…"
+          );
+          // Resize/compress before upload — a full-resolution phone photo
+          // (often 3-8MB) is far larger than a product photo needs to be,
+          // and it adds up fast in storage across hundreds of listings.
+          const resized = await resizeImageForUpload(files[i]);
+
           setStatus(
             files.length > 1 ? `Uploading photo ${i + 1} of ${files.length}…` : "Uploading photo…"
           );
-          const ext = EXTENSIONS[file.type] ?? "jpg";
-          const blob = await upload(`products/${crypto.randomUUID()}.${ext}`, file, {
+          const ext = EXTENSIONS[resized.type] ?? "jpg";
+          const blob = await upload(`products/${crypto.randomUUID()}.${ext}`, resized, {
             access: "public",
             handleUploadUrl: "/api/upload",
           });

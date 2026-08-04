@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { ProductCard } from "@/components/product-card";
+import { Pagination } from "@/components/ui/pagination";
 import { CATEGORIES, categoryBySlug } from "@/lib/categories";
-import { getProductsByCategory } from "@/lib/products";
+import { getProductsPage } from "@/lib/products";
 
 const DESCRIPTIONS: Record<string, string> = {
   furnishings:
@@ -36,14 +37,18 @@ export async function generateMetadata({
 
 export default async function CategoryPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ category: string }>;
+  searchParams: Promise<{ page?: string }>;
 }) {
   const { category: slug } = await params;
   const category = categoryBySlug(slug);
   if (!category) notFound();
 
-  const products = await getProductsByCategory(category.value);
+  const { page: pageParam } = await searchParams;
+  const page = Math.max(1, Number(pageParam) || 1);
+  const { products, totalPages } = await getProductsPage({ category: category.value, page });
 
   return (
     <div>
@@ -65,11 +70,14 @@ export default async function CategoryPage({
               No {category.label.toLowerCase()} are available right now — please check back soon.
             </p>
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-14">
-              {products.map((p, i) => (
-                <ProductCard key={p.slug} product={p} priority={i < 4} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-14">
+                {products.map((p, i) => (
+                  <ProductCard key={p.slug} product={p} priority={i < 4} />
+                ))}
+              </div>
+              <Pagination page={page} totalPages={totalPages} basePath={`/products/${category.slug}`} />
+            </>
           )}
         </Container>
       </section>

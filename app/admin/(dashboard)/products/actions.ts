@@ -4,10 +4,10 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { productSchema } from "@/lib/validation";
 import { generateUniqueSlug } from "@/lib/slug";
-import { saveUploadedImages, deleteUploadedImages } from "@/lib/uploads";
+import { deleteUploadedImages } from "@/lib/uploads";
 import { safeRevalidatePath } from "@/lib/revalidate";
 
-type ActionState = { error: string } | null;
+type ActionState = { error: string } | { redirectTo: string } | null;
 
 function parseProductForm(formData: FormData) {
   return productSchema.safeParse({
@@ -21,6 +21,17 @@ function parseProductForm(formData: FormData) {
   });
 }
 
+// Photos are uploaded directly from the browser to Blob storage before this
+// action ever runs (see components/admin/product-form.tsx), so all this
+// receives is the resulting URLs — never raw file bytes. That keeps every
+// submission tiny regardless of how many or how large the photos are,
+// well clear of Vercel's 4.5MB request body limit on serverless functions.
+function getImageUrls(formData: FormData): string[] {
+  return formData
+    .getAll("imageUrls")
+    .filter((v): v is string => typeof v === "string" && v.length > 0);
+}
+
 export async function createProduct(
   _prevState: ActionState,
   formData: FormData
@@ -30,9 +41,7 @@ export async function createProduct(
     return { error: parsed.error.issues[0]?.message ?? "Please check the form for errors." };
   }
 
-  const imageFiles = formData.getAll("images").filter((f): f is File => f instanceof File);
-  const imageUrls = await saveUploadedImages(imageFiles);
-
+  const imageUrls = getImageUrls(formData);
   const slug = await generateUniqueSlug(parsed.data.name);
 
   const product = await prisma.product.create({
@@ -52,7 +61,7 @@ export async function createProduct(
   });
 
   safeRevalidatePath("/", "layout");
-  redirect(`/admin/products/${product.id}/edit?created=1`);
+  return { redirectTo: `/admin/products/${product.id}/edit?created=1` };
 }
 
 export async function updateProduct(
@@ -73,9 +82,7 @@ export async function updateProduct(
 
   const removeIds = new Set(formData.getAll("removeImages").map(String));
   const keptImages = existing.images.filter((img) => !removeIds.has(img.id));
-
-  const imageFiles = formData.getAll("images").filter((f): f is File => f instanceof File);
-  const newImageUrls = await saveUploadedImages(imageFiles);
+  const newImageUrls = getImageUrls(formData);
 
   const slug =
     parsed.data.name === existing.name
@@ -120,7 +127,7 @@ export async function updateProduct(
   }
 
   safeRevalidatePath("/", "layout");
-  redirect(`/admin/products/${id}/edit?saved=1`);
+  return { redirectTo: `/admin/products/${id}/edit?saved=1` };
 }
 
 export async function deleteProduct(id: string): Promise<void> {

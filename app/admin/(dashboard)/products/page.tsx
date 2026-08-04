@@ -4,20 +4,33 @@ import { Plus } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { CATEGORIES, categoryBySlug, categoryLabel } from "@/lib/categories";
 import { formatPrice } from "@/lib/format";
+import { Pagination } from "@/components/ui/pagination";
+
+const PAGE_SIZE = 50;
 
 export default async function AdminProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; page?: string }>;
 }) {
-  const { category: categorySlug } = await searchParams;
+  const { category: categorySlug, page: pageParam } = await searchParams;
   const activeCategory = categorySlug ? categoryBySlug(categorySlug) : undefined;
+  const page = Math.max(1, Number(pageParam) || 1);
+  const where = activeCategory ? { category: activeCategory.value } : undefined;
 
-  const products = await prisma.product.findMany({
-    where: activeCategory ? { category: activeCategory.value } : undefined,
-    orderBy: { createdAt: "desc" },
-    include: { images: { orderBy: { position: "asc" }, take: 1 } },
-  });
+  const [products, totalCount] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      include: { images: { orderBy: { position: "asc" }, take: 1 } },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
+    prisma.product.count({ where }),
+  ]);
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
+  const basePath = activeCategory ? `/admin/products?category=${activeCategory.slug}` : "/admin/products";
 
   return (
     <div className="p-6 md:p-10">
@@ -26,7 +39,9 @@ export default async function AdminProductsPage({
           <p className="text-[11px] tracking-[0.2em] uppercase text-bronze-dark mb-2">
             Catalog
           </p>
-          <h1 className="font-serif-display text-3xl text-charcoal">Products</h1>
+          <h1 className="font-serif-display text-3xl text-charcoal">
+            Products <span className="text-charcoal-soft font-sans text-base">({totalCount})</span>
+          </h1>
         </div>
         <Link
           href="/admin/products/new"
@@ -70,43 +85,46 @@ export default async function AdminProductsPage({
             : 'No products yet. Click "Add Product" to publish your first piece.'}
         </p>
       ) : (
-        <div className="border border-line bg-paper">
-          {products.map((p) => (
-            <Link
-              key={p.id}
-              href={`/admin/products/${p.id}/edit`}
-              className="flex items-center gap-4 px-5 py-4 border-b border-line last:border-none hover:bg-ivory-dim transition-colors"
-            >
-              <div className="relative w-14 h-14 shrink-0 bg-ivory-dim">
-                {p.images[0] && (
-                  <NextImage
-                    src={p.images[0].url}
-                    alt=""
-                    fill
-                    sizes="56px"
-                    className="object-cover"
-                  />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[14px] text-charcoal truncate">{p.name}</p>
-                <p className="text-[12px] text-charcoal-soft mt-0.5">
-                  {categoryLabel(p.category)}
-                </p>
-              </div>
-              <div className="flex items-center gap-3 shrink-0">
-                {p.sold && (
-                  <span className="text-[10px] tracking-[0.1em] uppercase text-ivory bg-charcoal px-2 py-1">
-                    Sold
+        <>
+          <div className="border border-line bg-paper">
+            {products.map((p) => (
+              <Link
+                key={p.id}
+                href={`/admin/products/${p.id}/edit`}
+                className="flex items-center gap-4 px-5 py-4 border-b border-line last:border-none hover:bg-ivory-dim transition-colors"
+              >
+                <div className="relative w-14 h-14 shrink-0 bg-ivory-dim">
+                  {p.images[0] && (
+                    <NextImage
+                      src={p.images[0].url}
+                      alt=""
+                      fill
+                      sizes="56px"
+                      className="object-cover"
+                    />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[14px] text-charcoal truncate">{p.name}</p>
+                  <p className="text-[12px] text-charcoal-soft mt-0.5">
+                    {categoryLabel(p.category)}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  {p.sold && (
+                    <span className="text-[10px] tracking-[0.1em] uppercase text-ivory bg-charcoal px-2 py-1">
+                      Sold
+                    </span>
+                  )}
+                  <span className="text-[14px] text-charcoal tabular-nums w-20 text-right">
+                    {formatPrice(p.priceCents)}
                   </span>
-                )}
-                <span className="text-[14px] text-charcoal tabular-nums w-20 text-right">
-                  {formatPrice(p.priceCents)}
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+          <Pagination page={page} totalPages={totalPages} basePath={basePath} />
+        </>
       )}
     </div>
   );

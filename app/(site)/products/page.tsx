@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Container } from "@/components/ui/container";
 import { ProductCard } from "@/components/product-card";
-import { getAllProducts } from "@/lib/products";
+import { Pagination } from "@/components/ui/pagination";
+import { getProductsPage } from "@/lib/products";
 
 export const metadata: Metadata = {
   title: "All Products | Finding Treasures 4 U",
@@ -9,8 +10,14 @@ export const metadata: Metadata = {
     "Browse our full collection of authenticated antiques, furnishings, weathervanes, and collectables.",
 };
 
-export default async function AllProductsPage() {
-  const products = await getAllProducts();
+export default async function AllProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page: pageParam } = await searchParams;
+  const page = Math.max(1, Number(pageParam) || 1);
+  const { products, totalPages } = await getProductsPage({ page });
 
   return (
     <div>
@@ -32,11 +39,14 @@ export default async function AllProductsPage() {
               New treasures are on their way — please check back soon.
             </p>
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-14">
-              {products.map((p, i) => (
-                <ProductCard key={p.slug} product={p} priority={i < 4} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-14">
+                {products.map((p, i) => (
+                  <ProductCard key={p.slug} product={p} priority={i < 4} />
+                ))}
+              </div>
+              <Pagination page={page} totalPages={totalPages} basePath="/products" />
+            </>
           )}
         </Container>
       </section>

@@ -43,6 +43,47 @@ export async function getAllProducts() {
   return products.map(toCard);
 }
 
+export const PRODUCTS_PAGE_SIZE = 24;
+
+/**
+ * Paginated product listing, used by the /products and /products/[category]
+ * pages so a catalog of hundreds of items doesn't load (and render) as one
+ * unbounded page.
+ */
+export async function getProductsPage({
+  category,
+  page = 1,
+  pageSize = PRODUCTS_PAGE_SIZE,
+}: {
+  category?: Category;
+  page?: number;
+  pageSize?: number;
+}) {
+  const where = category ? { category } : undefined;
+
+  // Resolve the total count first so an out-of-range page (e.g. someone
+  // editing ?page=99 by hand) clamps to the real last page instead of
+  // coming back empty and showing a misleading "nothing here" state.
+  const totalCount = await prisma.product.count({ where });
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const safePage = Math.min(Math.max(1, page), totalPages);
+
+  const products = await prisma.product.findMany({
+    where,
+    orderBy: [{ sold: "asc" }, { createdAt: "desc" }],
+    select: cardSelect,
+    skip: (safePage - 1) * pageSize,
+    take: pageSize,
+  });
+
+  return {
+    products: products.map(toCard),
+    totalCount,
+    totalPages,
+    page: safePage,
+  };
+}
+
 export async function getCategoryPreviewImage(category: Category) {
   const product = await prisma.product.findFirst({
     where: { category },

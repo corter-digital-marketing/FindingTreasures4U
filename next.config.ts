@@ -7,14 +7,11 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
     ],
   },
-  experimental: {
-    serverActions: {
-      // Default is 1MB, which a single real product photo can easily exceed.
-      // The product form allows multiple photos per submission, so this
-      // needs enough headroom for several full-resolution images at once.
-      bodySizeLimit: "25mb",
-    },
-  },
+  // Note: product photos upload directly from the browser to Vercel Blob
+  // (see app/api/upload/route.ts) rather than through a Server Action, since
+  // Vercel caps serverless function request bodies at 4.5MB regardless of
+  // any bodySizeLimit set here. Server Actions in this app only ever carry
+  // text fields, so the default limit is plenty.
 };
 
 export default nextConfig;

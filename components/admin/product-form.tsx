@@ -1,6 +1,8 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { upload } from "@vercel/blob/client";
 import Image from "next/image";
 import Link from "next/link";
 import { Trash2 } from "lucide-react";
@@ -9,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { CATEGORIES } from "@/lib/categories";
 import type { Category } from "@/app/generated/prisma";
 
-type ActionState = { error: string } | null;
+type ActionState = { error: string } | { redirectTo: string } | null;
 
 export type ProductFormInitial = {
   id?: string;
@@ -23,6 +25,13 @@ export type ProductFormInitial = {
   images: { id: string; url: string }[];
 };
 
+const EXTENSIONS: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/gif": "gif",
+};
+
 export function ProductForm({
   action,
   initial,
@@ -34,7 +43,10 @@ export function ProductForm({
   submitLabel: string;
   onDelete?: () => Promise<void>;
 }) {
-  const [state, formAction, pending] = useActionState(action, null);
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+  const [status, setStatus] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [removedIds, setRemovedIds] = useState<Set<string>>(new Set());
 
   const toggleRemove = (id: string) => {
@@ -46,8 +58,56 @@ export function ProductForm({
     });
   };
 
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+    setPending(true);
+
+    const formData = new FormData(e.currentTarget);
+
+    // Photos are uploaded directly to Blob storage from the browser, never
+    // through this form submission — Vercel caps Server Action request
+    // bodies at 4.5MB, which even one or two real photos can exceed.
+    const files = formData
+      .getAll("images")
+      .filter((f): f is File => f instanceof File && f.size > 0);
+    formData.delete("images");
+
+    try {
+      if (files.length > 0) {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          setStatus(
+            files.length > 1 ? `Uploading photo ${i + 1} of ${files.length}…` : "Uploading photo…"
+          );
+          const ext = EXTENSIONS[file.type] ?? "jpg";
+          const blob = await upload(`products/${crypto.randomUUID()}.${ext}`, file, {
+            access: "public",
+            handleUploadUrl: "/api/upload",
+          });
+          formData.append("imageUrls", blob.url);
+        }
+      }
+
+      setStatus("Saving…");
+      const result = await action(null, formData);
+
+      if (result && "error" in result) {
+        setError(result.error);
+      } else if (result && "redirectTo" in result) {
+        router.push(result.redirectTo);
+        return;
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setPending(false);
+      setStatus(null);
+    }
+  }
+
   return (
-    <form action={formAction} className="max-w-2xl space-y-10">
+    <form onSubmit={handleSubmit} className="max-w-2xl space-y-10">
       <fieldset className="space-y-6">
         <legend className="font-serif-display text-xl text-charcoal mb-1">Details</legend>
         <Field label="Name" name="name" required defaultValue={initial?.name} />
@@ -157,16 +217,16 @@ export function ProductForm({
         </label>
       </fieldset>
 
-      {state?.error && (
+      {error && (
         <p className="text-[13px] text-oxblood" role="alert">
-          {state.error}
+          {error}
         </p>
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
         <div className="flex items-center gap-4">
           <Button type="submit" disabled={pending}>
-            {pending ? "Saving…" : submitLabel}
+            {pending ? (status ?? "Saving…") : submitLabel}
           </Button>
           <Link href="/admin/products" className="link-underline text-[13px] text-charcoal-soft">
             Cancel

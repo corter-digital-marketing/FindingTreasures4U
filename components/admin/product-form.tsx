@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, unstable_rethrow } from "next/navigation";
 import { upload } from "@vercel/blob/client";
 import Image from "next/image";
 import Link from "next/link";
@@ -49,6 +49,7 @@ export function ProductForm({
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [removedIds, setRemovedIds] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
 
   const toggleRemove = (id: string) => {
     setRemovedIds((prev) => {
@@ -111,6 +112,26 @@ export function ProductForm({
     } finally {
       setPending(false);
       setStatus(null);
+    }
+  }
+
+  async function handleDelete() {
+    if (!onDelete) return;
+    const confirmed = window.confirm(
+      `Delete "${initial?.name ?? "this product"}"? This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    setDeleting(true);
+    try {
+      // onDelete calls redirect() on success, which throws a special
+      // Next.js error to trigger the navigation — unstable_rethrow lets
+      // that pass through untouched instead of being treated as a failure.
+      await onDelete();
+    } catch (err) {
+      unstable_rethrow(err);
+      setDeleting(false);
+      setError(err instanceof Error ? err.message : "Couldn't delete this product. Please try again.");
     }
   }
 
@@ -241,15 +262,19 @@ export function ProductForm({
           </Link>
         </div>
         {onDelete && (
-          <form action={onDelete}>
-            <button
-              type="submit"
-              className="flex items-center gap-1.5 text-[13px] text-oxblood hover:text-oxblood-dark transition-colors"
-            >
-              <Trash2 className="w-4 h-4" strokeWidth={1.5} />
-              Delete
-            </button>
-          </form>
+          // A nested <form> here (as this used to be) is invalid HTML —
+          // browsers silently drop it, so the button fell through to the
+          // outer save form instead of ever calling onDelete. Plain
+          // type="button" + onClick avoids nesting forms entirely.
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={deleting}
+            className="flex items-center gap-1.5 text-[13px] text-oxblood hover:text-oxblood-dark transition-colors disabled:opacity-50"
+          >
+            <Trash2 className="w-4 h-4" strokeWidth={1.5} />
+            {deleting ? "Deleting…" : "Delete"}
+          </button>
         )}
       </div>
     </form>

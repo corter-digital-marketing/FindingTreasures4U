@@ -83,3 +83,13 @@ model OrderItem {
   order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
 }
+
+// Tracks failed admin login attempts per client IP, so brute-force guessing
+// gets locked out. Lives in the database (not in-memory) because Vercel's
+// serverless functions don't share memory across instances or cold starts.
+model LoginAttempt {
+  identifier   String    @id
+  attempts     Int       @default(0)
+  firstAttempt DateTime  @default(now())
+  lockedUntil  DateTime?
+}

@@ -12,7 +12,7 @@ import { formatPrice } from "@/lib/format";
 import { submitOrder } from "./actions";
 
 export default function CheckoutPage() {
-  const { items, subtotalCents, ready } = useCart();
+  const { items, subtotalCents, shippingCents, totalCents, ready } = useCart();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -159,10 +159,17 @@ export default function CheckoutPage() {
               <span>Subtotal</span>
               <span className="tabular-nums">{formatPrice(subtotalCents)}</span>
             </div>
-            <p className="mt-2 text-[12px] leading-relaxed text-charcoal-soft">
-              Shipping is quoted separately once we&apos;ve confirmed packing requirements for
-              your items.
-            </p>
+            <div className="mt-2 flex items-center justify-between text-[14px] text-charcoal">
+              <span>Shipping</span>
+              <span className="tabular-nums">
+                {shippingCents > 0 ? formatPrice(shippingCents) : "Free"}
+              </span>
+            </div>
+            <div className="hairline my-4" />
+            <div className="flex items-center justify-between text-[15px] text-charcoal">
+              <span>Total</span>
+              <span className="tabular-nums">{formatPrice(totalCents)}</span>
+            </div>
 
             {error && (
               <p className="mt-4 text-[13px] text-oxblood" role="alert">

@@ -29,6 +29,7 @@ export default async function EditProductPage({
           name: product.name,
           category: product.category,
           priceCents: product.priceCents,
+          shippingCents: product.shippingCents,
           description: product.description,
           condition: product.condition,
           dimensions: product.dimensions,

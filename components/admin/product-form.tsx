@@ -19,6 +19,7 @@ export type ProductFormInitial = {
   name: string;
   category: Category;
   priceCents: number;
+  shippingCents: number;
   description: string;
   condition: string | null;
   dimensions: string | null;
@@ -172,7 +173,20 @@ export function ProductForm({
             required
             defaultValue={initial ? (initial.priceCents / 100).toFixed(2) : undefined}
           />
+
+          <Field
+            label="Shipping Price (USD)"
+            name="shippingDollars"
+            type="number"
+            min="0"
+            step="0.01"
+            required
+            defaultValue={initial ? (initial.shippingCents / 100).toFixed(2) : undefined}
+          />
         </div>
+        <p className="-mt-3 text-[12px] text-charcoal-soft">
+          Flat shipping charge added at checkout for this piece. Enter 0 for free shipping.
+        </p>
 
         <TextAreaField
           label="Description"

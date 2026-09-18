@@ -53,6 +53,14 @@ export default async function AdminOrdersPage() {
                         </span>
                       </li>
                     ))}
+                    {order.shippingCents > 0 && (
+                      <li className="flex justify-between gap-4">
+                        <span>Shipping</span>
+                        <span className="tabular-nums text-charcoal-soft">
+                          {formatPrice(order.shippingCents)}
+                        </span>
+                      </li>
+                    )}
                   </ul>
                 </div>
                 <div>

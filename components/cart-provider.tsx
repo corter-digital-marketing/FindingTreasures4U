@@ -14,6 +14,8 @@ export type CartItem = {
   slug: string;
   name: string;
   priceCents: number;
+  // Optional so carts saved in localStorage before shipping existed still load.
+  shippingCents?: number;
   image: string | null;
   category: string;
 };
@@ -25,6 +27,8 @@ type CartContextValue = {
   hasItem: (id: string) => boolean;
   clear: () => void;
   subtotalCents: number;
+  shippingCents: number;
+  totalCents: number;
   ready: boolean;
 };
 
@@ -70,9 +74,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [items]
   );
 
+  const shippingCents = useMemo(
+    () => items.reduce((sum, i) => sum + (i.shippingCents ?? 0), 0),
+    [items]
+  );
+
+  const totalCents = subtotalCents + shippingCents;
+
   return (
     <CartContext.Provider
-      value={{ items, addItem, removeItem, hasItem, clear, subtotalCents, ready }}
+      value={{
+        items,
+        addItem,
+        removeItem,
+        hasItem,
+        clear,
+        subtotalCents,
+        shippingCents,
+        totalCents,
+        ready,
+      }}
     >
       {children}
     </CartContext.Provider>

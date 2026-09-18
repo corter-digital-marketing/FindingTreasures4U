@@ -10,7 +10,7 @@ import { formatPrice } from "@/lib/format";
 import type { Category } from "@/app/generated/prisma";
 
 export default function CartPage() {
-  const { items, removeItem, subtotalCents, ready } = useCart();
+  const { items, removeItem, subtotalCents, shippingCents, totalCents, ready } = useCart();
 
   return (
     <Container className="py-14 md:py-20">
@@ -79,9 +79,17 @@ export default function CartPage() {
                 <span>Subtotal</span>
                 <span className="tabular-nums">{formatPrice(subtotalCents)}</span>
               </div>
-              <p className="mt-2 text-[12px] leading-relaxed text-charcoal-soft">
-                Shipping is calculated at checkout based on destination and item size.
-              </p>
+              <div className="mt-2 flex items-center justify-between text-[14px] text-charcoal">
+                <span>Shipping</span>
+                <span className="tabular-nums">
+                  {shippingCents > 0 ? formatPrice(shippingCents) : "Free"}
+                </span>
+              </div>
+              <div className="hairline my-4" />
+              <div className="flex items-center justify-between text-[15px] text-charcoal">
+                <span>Total</span>
+                <span className="tabular-nums">{formatPrice(totalCents)}</span>
+              </div>
               <Link
                 href="/checkout"
                 className="mt-6 flex w-full items-center justify-center gap-2 bg-oxblood px-7 py-3.5 text-[13px] font-medium uppercase tracking-[0.14em] text-ivory transition-colors duration-300 hover:bg-oxblood-dark"

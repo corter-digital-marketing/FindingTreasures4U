@@ -1,9 +1,12 @@
 export function formatPrice(cents: number): string {
+  // Whole-dollar amounts stay clean ("$300"); anything with cents shows them
+  // ("$45.50") so shipping and totals are never silently rounded.
+  const digits = cents % 100 === 0 ? 0 : 2;
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
   }).format(cents / 100);
 }
 

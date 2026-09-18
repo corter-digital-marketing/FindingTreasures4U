@@ -71,6 +71,14 @@ export default async function OrderConfirmationPage({
             <span className="text-charcoal-soft tabular-nums">{formatPrice(item.priceCents)}</span>
           </div>
         ))}
+        {order.shippingCents > 0 && (
+          <div className="flex items-center justify-between py-4 border-b border-line-soft text-[14px]">
+            <span className="text-charcoal">Shipping</span>
+            <span className="text-charcoal-soft tabular-nums">
+              {formatPrice(order.shippingCents)}
+            </span>
+          </div>
+        )}
         <div className="flex items-center justify-between py-4 text-[15px]">
           <span className="text-charcoal">Total</span>
           <span className="text-charcoal tabular-nums">{formatPrice(order.totalCents)}</span>

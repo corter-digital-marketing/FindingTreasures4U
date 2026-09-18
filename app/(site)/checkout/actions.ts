@@ -42,7 +42,11 @@ export async function submitOrder(
     return { error: `"${alreadySold.name}" has just sold and is no longer available.` };
   }
 
-  const totalCents = products.reduce((sum, p) => sum + p.priceCents, 0);
+  // Shipping is summed from what's stored in the database, never from
+  // anything the browser sent — the cart's copy is display-only.
+  const subtotalCents = products.reduce((sum, p) => sum + p.priceCents, 0);
+  const shippingCents = products.reduce((sum, p) => sum + p.shippingCents, 0);
+  const totalCents = subtotalCents + shippingCents;
 
   // The order is created up front so we have something for the Stripe
   // session to reference, but products are NOT marked sold here — that only
@@ -52,6 +56,7 @@ export async function submitOrder(
   const order = await prisma.order.create({
     data: {
       ...shipping,
+      shippingCents,
       totalCents,
       items: {
         create: products.map((p) => ({
@@ -82,6 +87,17 @@ export async function submitOrder(
           },
         },
       })),
+      ...(shippingCents > 0 && {
+        shipping_options: [
+          {
+            shipping_rate_data: {
+              type: "fixed_amount" as const,
+              display_name: "Shipping",
+              fixed_amount: { amount: shippingCents, currency: "usd" },
+            },
+          },
+        ],
+      }),
       metadata: { orderId: order.id },
       success_url: `${origin}/checkout/confirmation/${order.id}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/checkout`,

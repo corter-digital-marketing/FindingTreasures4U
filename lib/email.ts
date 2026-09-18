@@ -16,6 +16,7 @@ type OrderForEmail = {
   country: string;
   notes: string | null;
   totalCents: number;
+  shippingCents: number;
   items: { nameSnapshot: string; priceCents: number }[];
 };
 
@@ -27,13 +28,18 @@ function resendClient(): Resend | null {
   return new Resend(process.env.RESEND_API_KEY);
 }
 
-function itemsListHtml(items: OrderForEmail["items"]) {
-  return items
+function itemsListHtml(order: OrderForEmail) {
+  const rows = order.items
     .map(
       (item) =>
         `<tr><td style="padding:4px 0;">${item.nameSnapshot}</td><td style="padding:4px 0;text-align:right;">${formatPrice(item.priceCents)}</td></tr>`
     )
     .join("");
+  const shippingRow =
+    order.shippingCents > 0
+      ? `<tr><td style="padding:4px 0;">Shipping</td><td style="padding:4px 0;text-align:right;">${formatPrice(order.shippingCents)}</td></tr>`
+      : "";
+  return rows + shippingRow;
 }
 
 function addressHtml(order: OrderForEmail) {
@@ -67,7 +73,7 @@ export async function sendOrderNotificationToOwner(order: OrderForEmail): Promis
           <p><strong>${order.customerName}</strong><br>
           ${order.email}${order.phone ? ` · ${order.phone}` : ""}</p>
           <table style="width:100%;border-collapse:collapse;margin:16px 0;">
-            ${itemsListHtml(order.items)}
+            ${itemsListHtml(order)}
             <tr><td style="padding-top:8px;font-weight:bold;">Total</td><td style="padding-top:8px;text-align:right;font-weight:bold;">${formatPrice(order.totalCents)}</td></tr>
           </table>
           <p><strong>Shipping To</strong><br>${addressHtml(order)}</p>
@@ -96,7 +102,7 @@ export async function sendOrderConfirmationToCustomer(order: OrderForEmail): Pro
           <p>We've reserved the piece${order.items.length > 1 ? "s" : ""} below and received your
           shipping details. We'll be in touch shortly to confirm payment and arrange shipping.</p>
           <table style="width:100%;border-collapse:collapse;margin:16px 0;">
-            ${itemsListHtml(order.items)}
+            ${itemsListHtml(order)}
             <tr><td style="padding-top:8px;font-weight:bold;">Total</td><td style="padding-top:8px;text-align:right;font-weight:bold;">${formatPrice(order.totalCents)}</td></tr>
           </table>
           <p><strong>Shipping To</strong><br>${addressHtml(order)}</p>

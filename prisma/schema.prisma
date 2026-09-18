@@ -26,18 +26,20 @@ enum OrderStatus {
 }
 
 model Product {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  name        String
-  category    Category
-  priceCents  Int
-  description String
-  condition   String?
-  dimensions  String?
-  featured    Boolean  @default(false)
-  sold        Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  name          String
+  category      Category
+  priceCents    Int
+  // Flat shipping charge for this piece, in cents. 0 means free shipping.
+  shippingCents Int      @default(0)
+  description   String
+  condition     String?
+  dimensions    String?
+  featured      Boolean  @default(false)
+  sold          Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   images     ProductImage[]
   orderItems OrderItem[]
@@ -64,6 +66,8 @@ model Order {
   postalCode              String
   country                 String
   notes                   String?
+  shippingCents           Int         @default(0)
+  // Charged amount: items subtotal plus shippingCents.
   totalCents              Int
   stripeCheckoutSessionId String?     @unique
   stripePaymentIntentId   String?

@@ -71,6 +71,11 @@ export default async function ProductPage({
             <p className="mt-5 text-[22px] text-charcoal tabular-nums">
               {formatPrice(product.priceCents)}
             </p>
+            <p className="mt-1 text-[13px] text-charcoal-soft">
+              {product.shippingCents > 0
+                ? `+ ${formatPrice(product.shippingCents)} shipping`
+                : "Free shipping"}
+            </p>
 
             <div className="mt-8">
               <AddToCartButton
@@ -80,6 +85,7 @@ export default async function ProductPage({
                   slug: product.slug,
                   name: product.name,
                   priceCents: product.priceCents,
+                  shippingCents: product.shippingCents,
                   image: product.images[0]?.url ?? null,
                   category: product.category,
                 }}

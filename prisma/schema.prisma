@@ -15,6 +15,7 @@ enum Category {
   WEATHERVANES
   COLLECTABLES
   ARTWORKS
+  JEWELRY
 }
 
 enum OrderStatus {

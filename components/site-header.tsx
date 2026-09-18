@@ -42,7 +42,7 @@ export function SiteHeader() {
               </span>
             </Link>
 
-            <nav className="hidden lg:flex items-center gap-9">
+            <nav className="hidden xl:flex items-center gap-6 2xl:gap-9">
               {NAV_LINKS.map((link) => {
                 const active =
                   link.href !== "/#about" &&
@@ -78,7 +78,7 @@ export function SiteHeader() {
               <button
                 aria-label={open ? "Close menu" : "Open menu"}
                 onClick={() => setOpen((v) => !v)}
-                className="lg:hidden p-2 -mr-2 text-charcoal"
+                className="xl:hidden p-2 -mr-2 text-charcoal"
               >
                 {open ? (
                   <X className="w-5 h-5" strokeWidth={1.5} />
@@ -92,7 +92,7 @@ export function SiteHeader() {
       </div>
 
       {open && (
-        <nav className="lg:hidden border-b border-line bg-ivory">
+        <nav className="xl:hidden border-b border-line bg-ivory">
           <div className="mx-auto max-w-[1400px] px-6 flex flex-col py-4">
             {NAV_LINKS.map((link) => (
               <Link

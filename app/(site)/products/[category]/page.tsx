@@ -15,6 +15,8 @@ const DESCRIPTIONS: Record<string, string> = {
     "Silver, porcelain, rugs, clocks, and other fine objects for the cabinet, table, or floor.",
   artworks:
     "Original paintings, prints, and works on paper — framed pieces with history and presence.",
+  jewelry:
+    "Rings, brooches, necklaces, and other adornments — vintage and antique pieces with character and craftsmanship.",
 };
 
 export function generateStaticParams() {

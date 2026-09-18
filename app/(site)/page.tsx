@@ -32,7 +32,7 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      {/* Shop by category — 2x2 grid */}
+      {/* Shop by category — 2-column grid */}
       <section className="py-14 md:py-20">
         <Container>
           <div className="flex items-end justify-between mb-6">
@@ -51,7 +51,13 @@ export default async function HomePage() {
               <Link
                 key={cat.slug}
                 href={`/products/${cat.slug}`}
-                className="group relative img-zoom block overflow-hidden aspect-[16/9]"
+                className={`group relative img-zoom block overflow-hidden aspect-[16/9] ${
+                  // With an odd number of categories, the last tile would sit
+                  // alone in a half-width column — let it span the full row.
+                  CATEGORIES.length % 2 === 1 && i === CATEGORIES.length - 1
+                    ? "sm:col-span-2 sm:aspect-[32/9]"
+                    : ""
+                }`}
               >
                 {categoryImages[i] ? (
                   <Image

@@ -18,7 +18,7 @@ export type CheckoutInput = z.infer<typeof checkoutSchema>;
 
 export const productSchema = z.object({
   name: z.string().trim().min(2, "Please enter a name for this piece."),
-  category: z.enum(["FURNISHINGS", "WEATHERVANES", "COLLECTABLES", "ARTWORKS"], {
+  category: z.enum(["FURNISHINGS", "WEATHERVANES", "COLLECTABLES", "ARTWORKS", "JEWELRY"], {
     message: "Please choose a category.",
   }),
   priceDollars: z.coerce.number().positive("Please enter a price greater than 0."),

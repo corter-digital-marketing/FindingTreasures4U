@@ -141,7 +141,7 @@ export default async function HomePage() {
               Antiques, uniques, and sought after items.
             </h2>
             <p className="mt-5 text-[14px] leading-relaxed text-charcoal-soft">
-              Finding Treasures 4 U, located at 346 East Main Street in Lock Haven, offers
+              Finding Treasures 4 U, located at 347 East Main Street in Lock Haven, offers
               antiques, uniques, and hard to find items. Every item has a story. From antique
               furniture to remarkable artworks, Finding Treasures has something for you.
             </p>

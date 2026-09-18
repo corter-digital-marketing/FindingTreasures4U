@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CATEGORIES } from "@/lib/categories";
+import { STORE_ADDRESS, STORE_EMAIL } from "@/lib/store";
 
 export function SiteFooter() {
   return (
@@ -58,9 +59,14 @@ export function SiteFooter() {
         <div>
           <h3 className="text-[11px] tracking-[0.18em] uppercase text-ivory/50 mb-4">Visit</h3>
           <p className="text-[13px] text-ivory/80 leading-relaxed">
-            By appointment
+            {STORE_ADDRESS}
             <br />
-            hello@findingtreasuresforyou.com
+            <a
+              href={`mailto:${STORE_EMAIL}`}
+              className="link-underline hover:text-bronze-light break-all"
+            >
+              {STORE_EMAIL}
+            </a>
           </p>
         </div>
       </div>

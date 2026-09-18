@@ -3,7 +3,8 @@
 import { useTransition } from "react";
 import { updateOrderStatus } from "@/app/admin/(dashboard)/orders/actions";
 
-const STATUSES = ["AWAITING_PAYMENT", "PAID", "FULFILLED", "CANCELLED"];
+// Only paid orders are listed, so "awaiting payment" is never a valid choice.
+const STATUSES = ["PAID", "FULFILLED", "CANCELLED"];
 
 export function OrderStatusSelect({ orderId, status }: { orderId: string; status: string }) {
   const [pending, startTransition] = useTransition();

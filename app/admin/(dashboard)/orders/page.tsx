@@ -2,9 +2,11 @@ import { prisma } from "@/lib/prisma";
 import { formatDate, formatPrice } from "@/lib/format";
 import { OrderStatusSelect } from "@/components/admin/order-status-select";
 import { STORE_ADDRESS } from "@/lib/store";
+import { PAID_ORDERS_WHERE } from "@/lib/orders";
 
 export default async function AdminOrdersPage() {
   const orders = await prisma.order.findMany({
+    where: PAID_ORDERS_WHERE,
     orderBy: { createdAt: "desc" },
     include: { items: true },
   });
@@ -16,7 +18,7 @@ export default async function AdminOrdersPage() {
 
       {orders.length === 0 ? (
         <p className="text-[13px] text-charcoal-soft">
-          No orders yet. Orders placed through checkout will appear here.
+          No orders yet. Orders will appear here once a customer has paid.
         </p>
       ) : (
         <div className="space-y-4">

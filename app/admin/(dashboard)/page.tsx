@@ -2,13 +2,14 @@ import Link from "next/link";
 import { ArrowUpRight, Plus } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatPrice, formatDate } from "@/lib/format";
+import { PAID_ORDERS_WHERE } from "@/lib/orders";
 
 export default async function AdminDashboardPage() {
   const [totalProducts, activeProducts, soldProducts, recentOrders] = await Promise.all([
     prisma.product.count(),
     prisma.product.count({ where: { sold: false } }),
     prisma.product.count({ where: { sold: true } }),
-    prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
+    prisma.order.findMany({ where: PAID_ORDERS_WHERE, orderBy: { createdAt: "desc" }, take: 5 }),
   ]);
 
   const stats = [

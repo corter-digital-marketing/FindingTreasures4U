@@ -85,6 +85,11 @@ export default function CartPage() {
                   {shippingCents > 0 ? formatPrice(shippingCents) : "Free"}
                 </span>
               </div>
+              {shippingCents > 0 && (
+                <p className="mt-2 text-[12px] leading-relaxed text-charcoal-soft">
+                  Shipping is free if you choose in-store pickup at checkout.
+                </p>
+              )}
               <div className="hairline my-4" />
               <div className="flex items-center justify-between text-[15px] text-charcoal">
                 <span>Total</span>

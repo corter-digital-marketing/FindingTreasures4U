@@ -73,7 +73,7 @@ export default async function ProductPage({
             </p>
             <p className="mt-1 text-[13px] text-charcoal-soft">
               {product.shippingCents > 0
-                ? `+ ${formatPrice(product.shippingCents)} shipping`
+                ? `+ ${formatPrice(product.shippingCents)} shipping, or free in-store pickup`
                 : "Free shipping"}
             </p>
 

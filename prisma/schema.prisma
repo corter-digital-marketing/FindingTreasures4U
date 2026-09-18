@@ -18,6 +18,11 @@ enum Category {
   JEWELRY
 }
 
+enum DeliveryMethod {
+  SHIPPING
+  PICKUP
+}
+
 enum OrderStatus {
   AWAITING_PAYMENT
   PAID
@@ -54,8 +59,11 @@ model ProductImage {
 }
 
 model Order {
-  id                      String      @id @default(cuid())
-  status                  OrderStatus @default(AWAITING_PAYMENT)
+  id                      String         @id @default(cuid())
+  status                  OrderStatus    @default(AWAITING_PAYMENT)
+  // PICKUP orders are collected in store: no shipping charge, and the address
+  // fields below are stored as empty strings.
+  deliveryMethod          DeliveryMethod @default(SHIPPING)
   customerName            String
   email                   String
   phone                   String?
@@ -66,13 +74,13 @@ model Order {
   postalCode              String
   country                 String
   notes                   String?
-  shippingCents           Int         @default(0)
+  shippingCents           Int            @default(0)
   // Charged amount: items subtotal plus shippingCents.
   totalCents              Int
-  stripeCheckoutSessionId String?     @unique
+  stripeCheckoutSessionId String?        @unique
   stripePaymentIntentId   String?
   paidAt                  DateTime?
-  createdAt               DateTime    @default(now())
+  createdAt               DateTime       @default(now())
 
   items OrderItem[]
 }

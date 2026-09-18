@@ -5,6 +5,7 @@ import { Container } from "@/components/ui/container";
 import { ClearCartOnMount } from "@/components/clear-cart-on-mount";
 import { prisma } from "@/lib/prisma";
 import { formatPrice, formatDate } from "@/lib/format";
+import { STORE_ADDRESS } from "@/lib/store";
 
 export default async function OrderConfirmationPage({
   params,
@@ -23,6 +24,7 @@ export default async function OrderConfirmationPage({
   // a beat after the browser redirect back here — so this page shouldn't
   // assume "paid" just because the customer reached it.
   const isPaid = order.status === "PAID" || order.status === "FULFILLED";
+  const isPickup = order.deliveryMethod === "PICKUP";
 
   return (
     <Container className="py-20 md:py-28 max-w-2xl">
@@ -41,7 +43,7 @@ export default async function OrderConfirmationPage({
             Your payment has been received and the piece{order.items.length > 1 ? "s" : ""} below
             are reserved for you. A confirmation has been sent to{" "}
             <span className="text-charcoal">{order.email}</span>, and we&apos;ll be in touch to
-            arrange shipping.
+            {isPickup ? " arrange a pickup time." : " arrange shipping."}
           </p>
         </>
       ) : (
@@ -95,16 +97,20 @@ export default async function OrderConfirmationPage({
         </div>
         <div>
           <h2 className="text-[11px] tracking-[0.14em] uppercase text-charcoal-soft mb-2">
-            Shipping To
+            {isPickup ? "Pickup At" : "Shipping To"}
           </h2>
-          <p className="text-charcoal leading-relaxed">
-            {order.addressLine1}
-            {order.addressLine2 ? `, ${order.addressLine2}` : ""}
-            <br />
-            {order.city}, {order.region} {order.postalCode}
-            <br />
-            {order.country}
-          </p>
+          {isPickup ? (
+            <p className="text-charcoal leading-relaxed">Finding Treasures 4 U<br />{STORE_ADDRESS}</p>
+          ) : (
+            <p className="text-charcoal leading-relaxed">
+              {order.addressLine1}
+              {order.addressLine2 ? `, ${order.addressLine2}` : ""}
+              <br />
+              {order.city}, {order.region} {order.postalCode}
+              <br />
+              {order.country}
+            </p>
+          )}
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatPrice } from "@/lib/format";
 import { OrderStatusSelect } from "@/components/admin/order-status-select";
+import { STORE_ADDRESS } from "@/lib/store";
 
 export default async function AdminOrdersPage() {
   const orders = await prisma.order.findMany({
@@ -65,16 +66,24 @@ export default async function AdminOrdersPage() {
                 </div>
                 <div>
                   <p className="text-[11px] tracking-[0.1em] uppercase text-charcoal-soft mb-2">
-                    Shipping To
+                    {order.deliveryMethod === "PICKUP" ? "In-Store Pickup" : "Shipping To"}
                   </p>
-                  <p className="text-[13px] text-charcoal leading-relaxed">
-                    {order.addressLine1}
-                    {order.addressLine2 ? `, ${order.addressLine2}` : ""}
-                    <br />
-                    {order.city}, {order.region} {order.postalCode}
-                    <br />
-                    {order.country}
-                  </p>
+                  {order.deliveryMethod === "PICKUP" ? (
+                    <p className="text-[13px] text-charcoal leading-relaxed">
+                      Customer will collect at {STORE_ADDRESS}.
+                      <br />
+                      Contact them to arrange a time.
+                    </p>
+                  ) : (
+                    <p className="text-[13px] text-charcoal leading-relaxed">
+                      {order.addressLine1}
+                      {order.addressLine2 ? `, ${order.addressLine2}` : ""}
+                      <br />
+                      {order.city}, {order.region} {order.postalCode}
+                      <br />
+                      {order.country}
+                    </p>
+                  )}
                   {order.notes && (
                     <p className="mt-2 text-[13px] text-charcoal-soft italic">
                       &ldquo;{order.notes}&rdquo;

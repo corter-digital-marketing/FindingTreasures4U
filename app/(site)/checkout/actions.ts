@@ -26,7 +26,8 @@ export async function submitOrder(
     return { error: parsed.error.issues[0]?.message ?? "Please check the form for errors." };
   }
 
-  const { items: itemIds, ...shipping } = parsed.data;
+  const { items: itemIds, deliveryMethod, ...contact } = parsed.data;
+  const isPickup = deliveryMethod === "PICKUP";
 
   const products = await prisma.product.findMany({
     where: { id: { in: itemIds } },
@@ -45,7 +46,8 @@ export async function submitOrder(
   // Shipping is summed from what's stored in the database, never from
   // anything the browser sent — the cart's copy is display-only.
   const subtotalCents = products.reduce((sum, p) => sum + p.priceCents, 0);
-  const shippingCents = products.reduce((sum, p) => sum + p.shippingCents, 0);
+  // In-store pickup never pays shipping.
+  const shippingCents = isPickup ? 0 : products.reduce((sum, p) => sum + p.shippingCents, 0);
   const totalCents = subtotalCents + shippingCents;
 
   // The order is created up front so we have something for the Stripe
@@ -55,7 +57,20 @@ export async function submitOrder(
   // available to other buyers.
   const order = await prisma.order.create({
     data: {
-      ...shipping,
+      deliveryMethod,
+      customerName: contact.customerName,
+      email: contact.email,
+      phone: contact.phone,
+      notes: contact.notes,
+      // Pickup orders have no delivery address; the columns are required, so
+      // they're stored empty and everything that displays an address checks
+      // deliveryMethod first.
+      addressLine1: isPickup ? "" : (contact.addressLine1 ?? ""),
+      addressLine2: isPickup ? "" : contact.addressLine2,
+      city: isPickup ? "" : (contact.city ?? ""),
+      region: isPickup ? "" : (contact.region ?? ""),
+      postalCode: isPickup ? "" : (contact.postalCode ?? ""),
+      country: isPickup ? "" : (contact.country ?? ""),
       shippingCents,
       totalCents,
       items: {
@@ -75,7 +90,7 @@ export async function submitOrder(
   try {
     session = await stripe.checkout.sessions.create({
       mode: "payment",
-      customer_email: shipping.email,
+      customer_email: contact.email,
       line_items: products.map((p) => ({
         quantity: 1,
         price_data: {

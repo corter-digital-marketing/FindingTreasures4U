@@ -1,10 +1,12 @@
 import { Resend } from "resend";
 import { formatPrice } from "@/lib/format";
+import { STORE_ADDRESS } from "@/lib/store";
 
 const FROM_ADDRESS = "Finding Treasures 4 U <onboarding@resend.dev>";
 
 type OrderForEmail = {
   id: string;
+  deliveryMethod: "SHIPPING" | "PICKUP";
   customerName: string;
   email: string;
   phone: string | null;
@@ -42,6 +44,13 @@ function itemsListHtml(order: OrderForEmail) {
   return rows + shippingRow;
 }
 
+function deliveryHtml(order: OrderForEmail) {
+  if (order.deliveryMethod === "PICKUP") {
+    return `<strong>In-Store Pickup</strong><br>Finding Treasures 4 U<br>${STORE_ADDRESS}`;
+  }
+  return `<strong>Shipping To</strong><br>${addressHtml(order)}`;
+}
+
 function addressHtml(order: OrderForEmail) {
   return [order.addressLine1, order.addressLine2, `${order.city}, ${order.region} ${order.postalCode}`, order.country]
     .filter(Boolean)
@@ -76,7 +85,7 @@ export async function sendOrderNotificationToOwner(order: OrderForEmail): Promis
             ${itemsListHtml(order)}
             <tr><td style="padding-top:8px;font-weight:bold;">Total</td><td style="padding-top:8px;text-align:right;font-weight:bold;">${formatPrice(order.totalCents)}</td></tr>
           </table>
-          <p><strong>Shipping To</strong><br>${addressHtml(order)}</p>
+          <p>${deliveryHtml(order)}</p>
           ${order.notes ? `<p><strong>Notes</strong><br>${order.notes}</p>` : ""}
           <p style="color:#6a5f4f;font-size:13px;">Order ID: ${order.id}</p>
         </div>
@@ -99,13 +108,13 @@ export async function sendOrderConfirmationToCustomer(order: OrderForEmail): Pro
       html: `
         <div style="font-family:sans-serif;color:#241f19;">
           <h2 style="margin:0 0 12px;">Thank you, ${order.customerName.split(" ")[0]}.</h2>
-          <p>We've reserved the piece${order.items.length > 1 ? "s" : ""} below and received your
-          shipping details. We'll be in touch shortly to confirm payment and arrange shipping.</p>
+          <p>Your payment has been received and the piece${order.items.length > 1 ? "s are" : " is"} reserved
+          for you. We'll be in touch shortly to ${order.deliveryMethod === "PICKUP" ? "arrange a pickup time" : "arrange shipping"}.</p>
           <table style="width:100%;border-collapse:collapse;margin:16px 0;">
             ${itemsListHtml(order)}
             <tr><td style="padding-top:8px;font-weight:bold;">Total</td><td style="padding-top:8px;text-align:right;font-weight:bold;">${formatPrice(order.totalCents)}</td></tr>
           </table>
-          <p><strong>Shipping To</strong><br>${addressHtml(order)}</p>
+          <p>${deliveryHtml(order)}</p>
           <p style="color:#6a5f4f;font-size:13px;">Order reference: ${order.id}</p>
         </div>
       `,

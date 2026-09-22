@@ -17,6 +17,8 @@ const DESCRIPTIONS: Record<string, string> = {
     "Original paintings, prints, and works on paper — framed pieces with history and presence.",
   jewelry:
     "Rings, brooches, necklaces, and other adornments — vintage and antique pieces with character and craftsmanship.",
+  currency:
+    "Coins, paper money, and other numismatic pieces — sought after for their history as much as their rarity.",
 };
 
 export function generateStaticParams() {

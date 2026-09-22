@@ -26,6 +26,7 @@ enum Category {
   COLLECTABLES
   ARTWORKS
   JEWELRY
+  CURRENCY
 }
 
 enum DeliveryMethod {

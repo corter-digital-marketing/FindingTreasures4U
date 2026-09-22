@@ -6,6 +6,7 @@ export const CATEGORIES: { value: Category; slug: string; label: string; singula
   { value: "COLLECTABLES", slug: "collectables", label: "Collectables", singular: "Collectable" },
   { value: "ARTWORKS", slug: "artworks", label: "Artworks", singular: "Artwork" },
   { value: "JEWELRY", slug: "jewelry", label: "Jewelry", singular: "Jewelry" },
+  { value: "CURRENCY", slug: "currency", label: "Currency", singular: "Currency" },
 ];
 
 export function categoryBySlug(slug: string) {

@@ -10,6 +10,16 @@ datasource db {
   provider = "postgresql"
 }
 
+enum ShippingTier {
+  SMALL
+  MEDIUM
+  LARGE
+  // "Really big" items: shipping can't be quoted automatically, so these are
+  // not purchasable online at all — the product page shows a contact prompt
+  // instead of Add to Cart, and submitOrder refuses them server-side too.
+  CONTACT
+}
+
 enum Category {
   FURNISHINGS
   WEATHERVANES
@@ -31,20 +41,21 @@ enum OrderStatus {
 }
 
 model Product {
-  id            String   @id @default(cuid())
-  slug          String   @unique
+  id            String       @id @default(cuid())
+  slug          String       @unique
   name          String
   category      Category
   priceCents    Int
   // Flat shipping charge for this piece, in cents. 0 means free shipping.
-  shippingCents Int      @default(0)
+  shippingCents Int          @default(0)
+  shippingTier  ShippingTier @default(SMALL)
   description   String
   condition     String?
   dimensions    String?
-  featured      Boolean  @default(false)
-  sold          Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  featured      Boolean      @default(false)
+  sold          Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
   images     ProductImage[]
   orderItems OrderItem[]

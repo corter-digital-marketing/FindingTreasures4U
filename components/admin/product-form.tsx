@@ -9,8 +9,9 @@ import { Trash2 } from "lucide-react";
 import { Field, TextAreaField } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { CATEGORIES } from "@/lib/categories";
+import { SHIPPING_TIERS } from "@/lib/shipping";
 import { resizeImageForUpload } from "@/lib/client-image-resize";
-import type { Category } from "@/app/generated/prisma";
+import type { Category, ShippingTier } from "@/app/generated/prisma";
 
 type ActionState = { error: string } | { redirectTo: string } | null;
 
@@ -19,7 +20,7 @@ export type ProductFormInitial = {
   name: string;
   category: Category;
   priceCents: number;
-  shippingCents: number;
+  shippingTier: ShippingTier;
   description: string;
   condition: string | null;
   dimensions: string | null;
@@ -174,18 +175,32 @@ export function ProductForm({
             defaultValue={initial ? (initial.priceCents / 100).toFixed(2) : undefined}
           />
 
-          <Field
-            label="Shipping Price (USD)"
-            name="shippingDollars"
-            type="number"
-            min="0"
-            step="0.01"
-            required
-            defaultValue={initial ? (initial.shippingCents / 100).toFixed(2) : undefined}
-          />
+          <label className="block">
+            <span className="text-[11px] tracking-[0.1em] uppercase text-charcoal-soft">
+              Shipping Size <span className="text-oxblood">*</span>
+            </span>
+            <select
+              name="shippingTier"
+              required
+              defaultValue={initial?.shippingTier ?? ""}
+              className="mt-2 w-full border-0 border-b border-line bg-transparent py-2 text-[15px] text-charcoal outline-none transition-colors focus:border-bronze-dark"
+            >
+              <option value="" disabled>
+                Select a shipping size
+              </option>
+              {SHIPPING_TIERS.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
         <p className="-mt-3 text-[12px] text-charcoal-soft">
-          Flat shipping charge added at checkout for this piece. Enter 0 for free shipping.
+          Shipping is a fixed rate by size — Small $16.90, Medium $39.80, Large $45.65. Really Big
+          Items aren&apos;t sold through the site at all: the product page shows a
+          &ldquo;Contact Us&rdquo; prompt instead of Add to Cart, so the buyer arranges shipping
+          directly with you.
         </p>
 
         <TextAreaField

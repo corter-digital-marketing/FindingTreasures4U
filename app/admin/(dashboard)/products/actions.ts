@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { productSchema } from "@/lib/validation";
 import { generateUniqueSlug } from "@/lib/slug";
 import { deleteUploadedImages } from "@/lib/uploads";
+import { shippingCentsForTier } from "@/lib/shipping";
 import { safeRevalidatePath } from "@/lib/revalidate";
 
 type ActionState = { error: string } | { redirectTo: string } | null;
@@ -14,7 +15,7 @@ function parseProductForm(formData: FormData) {
     name: formData.get("name"),
     category: formData.get("category"),
     priceDollars: formData.get("priceDollars"),
-    shippingDollars: formData.get("shippingDollars"),
+    shippingTier: formData.get("shippingTier"),
     description: formData.get("description"),
     condition: formData.get("condition"),
     dimensions: formData.get("dimensions"),
@@ -51,7 +52,8 @@ export async function createProduct(
       name: parsed.data.name,
       category: parsed.data.category,
       priceCents: Math.round(parsed.data.priceDollars * 100),
-      shippingCents: Math.round(parsed.data.shippingDollars * 100),
+      shippingTier: parsed.data.shippingTier,
+      shippingCents: shippingCentsForTier(parsed.data.shippingTier),
       description: parsed.data.description,
       condition: parsed.data.condition || null,
       dimensions: parsed.data.dimensions || null,
@@ -104,7 +106,8 @@ export async function updateProduct(
         name: parsed.data.name,
         category: parsed.data.category,
         priceCents: Math.round(parsed.data.priceDollars * 100),
-        shippingCents: Math.round(parsed.data.shippingDollars * 100),
+        shippingTier: parsed.data.shippingTier,
+        shippingCents: shippingCentsForTier(parsed.data.shippingTier),
         description: parsed.data.description,
         condition: parsed.data.condition || null,
         dimensions: parsed.data.dimensions || null,

@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { checkoutSchema } from "@/lib/validation";
 import { stripe } from "@/lib/stripe";
+import { isPurchasableTier } from "@/lib/shipping";
 
 async function getSiteOrigin(): Promise<string> {
   try {
@@ -41,6 +42,15 @@ export async function submitOrder(
   const alreadySold = products.find((p) => p.sold);
   if (alreadySold) {
     return { error: `"${alreadySold.name}" has just sold and is no longer available.` };
+  }
+
+  // Defense in depth — the product page never offers Add to Cart for these,
+  // but the cart is client-side state, so a request could still name one.
+  const needsContact = products.find((p) => !isPurchasableTier(p.shippingTier));
+  if (needsContact) {
+    return {
+      error: `"${needsContact.name}" requires contacting us directly to purchase — it isn't sold through checkout.`,
+    };
   }
 
   // Shipping is summed from what's stored in the database, never from

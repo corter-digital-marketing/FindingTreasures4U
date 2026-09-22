@@ -14,6 +14,10 @@ const variants: Record<Variant, string> = {
   ghost: "text-charcoal px-0 py-1 hover:text-bronze-dark",
 };
 
+export function buttonClassName(variant: Variant = "primary", className = ""): string {
+  return `${base} ${variants[variant]} ${className}`;
+}
+
 export const Button = forwardRef<
   HTMLButtonElement,
   ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }

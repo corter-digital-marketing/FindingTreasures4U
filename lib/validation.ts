@@ -43,7 +43,9 @@ export const productSchema = z.object({
     message: "Please choose a category.",
   }),
   priceDollars: z.coerce.number().positive("Please enter a price greater than 0."),
-  shippingDollars: z.coerce.number().min(0, "Shipping can't be negative — enter 0 for free shipping."),
+  shippingTier: z.enum(["SMALL", "MEDIUM", "LARGE", "CONTACT"], {
+    message: "Please choose a shipping size.",
+  }),
   description: z.string().trim().min(10, "Please add a short description."),
   condition: z.string().trim().optional(),
   dimensions: z.string().trim().optional(),

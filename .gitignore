@@ -48,3 +48,6 @@ next-env.d.ts
 
 # original uploaded photos (raw HEIC source files, not web assets)
 /photos
+
+# raw bulk-import source files (Zophi PDF exports, etc.)
+/FT4U Items

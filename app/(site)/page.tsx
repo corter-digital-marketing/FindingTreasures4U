@@ -4,8 +4,10 @@ import { ArrowUpRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { ProductCard } from "@/components/product-card";
 import { CategoryRow } from "@/components/category-row";
+import { AboutGallery } from "@/components/about-gallery";
 import { CATEGORIES } from "@/lib/categories";
 import { getCategoryPreviewImage, getNewArrivals, getProductsByCategory } from "@/lib/products";
+import { STORE_ADDRESS, STORE_PHONE } from "@/lib/store";
 
 export default async function HomePage() {
   const [newArrivals, categoryImages, categoryProducts] = await Promise.all([
@@ -124,13 +126,12 @@ export default async function HomePage() {
       {/* About */}
       <section id="about" className="py-14 md:py-20">
         <Container className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
-          <div className="relative aspect-[4/5] order-2 md:order-1">
-            <Image
-              src="https://placehold.co/1000x1250/e9e0cb/352a20.png?text=Our+Workshop&font=playfair-display"
-              alt="The Finding Treasures 4 U workshop"
-              fill
-              className="object-cover"
-              sizes="(min-width: 768px) 50vw, 100vw"
+          <div className="order-2 md:order-1">
+            <AboutGallery
+              images={[
+                { src: "/about/owner-1.jpg", alt: "Rick Petrunyak in the Finding Treasures 4 U showroom" },
+                { src: "/about/owner-2.jpg", alt: "Rick Petrunyak with a piece from the collection" },
+              ]}
             />
           </div>
           <div className="order-1 md:order-2 max-w-lg">
@@ -141,10 +142,12 @@ export default async function HomePage() {
               Antiques, uniques, and sought after items.
             </h2>
             <p className="mt-5 text-[14px] leading-relaxed text-charcoal-soft">
-              Finding Treasures 4 U, located at 347 East Main Street in Lock Haven, offers
-              antiques, uniques, and hard to find items. Every item has a story. From antique
-              furniture to remarkable artworks, Finding Treasures has something for you.
+              My name is Rick R Petrunyak, also known as Big Daddy Rickster! I have been
+              collecting antiques for around 30 years, and I have a love and passion for it.
+              Browse the online store or come visit us at {STORE_ADDRESS}. Or schedule an
+              appointment to visit anytime.
             </p>
+            {STORE_PHONE && <p className="mt-3 text-[14px] text-charcoal-soft">{STORE_PHONE}</p>}
             <Link
               href="/products"
               className="link-underline mt-6 inline-flex items-center gap-1.5 text-[13px] tracking-[0.14em] uppercase text-charcoal"

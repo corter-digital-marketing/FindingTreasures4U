@@ -45,3 +45,6 @@ next-env.d.ts
 # local sqlite database
 *.db
 *.db-journal
+
+# original uploaded photos (raw HEIC source files, not web assets)
+/photos

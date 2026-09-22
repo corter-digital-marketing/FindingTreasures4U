@@ -20,6 +20,7 @@ function parseProductForm(formData: FormData) {
     condition: formData.get("condition"),
     dimensions: formData.get("dimensions"),
     sold: formData.get("sold") === "on",
+    published: formData.get("published") === "on",
   });
 }
 
@@ -58,6 +59,7 @@ export async function createProduct(
       condition: parsed.data.condition || null,
       dimensions: parsed.data.dimensions || null,
       sold: !!parsed.data.sold,
+      published: !!parsed.data.published,
       images: {
         create: imageUrls.map((url, i) => ({ url, position: i })),
       },
@@ -112,6 +114,7 @@ export async function updateProduct(
         condition: parsed.data.condition || null,
         dimensions: parsed.data.dimensions || null,
         sold: !!parsed.data.sold,
+        published: !!parsed.data.published,
       },
     });
     for (let i = 0; i < keptImages.length; i++) {

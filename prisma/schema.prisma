@@ -49,6 +49,11 @@ model Product {
   // Flat shipping charge for this piece, in cents. 0 means free shipping.
   shippingCents Int          @default(0)
   shippingTier  ShippingTier @default(SMALL)
+  // Hidden from the public site entirely (listings, category pages, direct
+  // product URL for non-admins) until the owner flips this on. Defaults to
+  // true so the normal one-at-a-time admin flow is unaffected; bulk imports
+  // set this false so hundreds of items can be reviewed before going live.
+  published     Boolean      @default(true)
   description   String
   condition     String?
   dimensions    String?

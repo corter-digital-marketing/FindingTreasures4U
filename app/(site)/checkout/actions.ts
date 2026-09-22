@@ -53,6 +53,11 @@ export async function submitOrder(
     };
   }
 
+  const unpublished = products.find((p) => !p.published);
+  if (unpublished) {
+    return { error: `"${unpublished.name}" isn't available for purchase yet.` };
+  }
+
   // Shipping is summed from what's stored in the database, never from
   // anything the browser sent — the cart's copy is display-only.
   const subtotalCents = products.reduce((sum, p) => sum + p.priceCents, 0);

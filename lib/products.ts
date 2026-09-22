@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import type { Category } from "@/app/generated/prisma";
+import type { Category, Prisma } from "@/app/generated/prisma";
 
 const cardSelect = {
   slug: true,
@@ -17,7 +17,7 @@ function toCard<T extends { images: { url: string }[] }>(p: T) {
 
 export async function getNewArrivals(take = 8) {
   const products = await prisma.product.findMany({
-    where: { sold: false },
+    where: { sold: false, published: true },
     orderBy: { createdAt: "desc" },
     take,
     select: cardSelect,
@@ -27,7 +27,7 @@ export async function getNewArrivals(take = 8) {
 
 export async function getProductsByCategory(category: Category, take?: number) {
   const products = await prisma.product.findMany({
-    where: { category },
+    where: { category, published: true },
     orderBy: [{ sold: "asc" }, { createdAt: "desc" }],
     take,
     select: cardSelect,
@@ -37,6 +37,7 @@ export async function getProductsByCategory(category: Category, take?: number) {
 
 export async function getAllProducts() {
   const products = await prisma.product.findMany({
+    where: { published: true },
     orderBy: [{ sold: "asc" }, { createdAt: "desc" }],
     select: cardSelect,
   });
@@ -59,7 +60,8 @@ export async function getProductsPage({
   page?: number;
   pageSize?: number;
 }) {
-  const where = category ? { category } : undefined;
+  // Draft (unpublished) items never appear in public listings, at any page.
+  const where: Prisma.ProductWhereInput = category ? { category, published: true } : { published: true };
 
   // Resolve the total count first so an out-of-range page (e.g. someone
   // editing ?page=99 by hand) clamps to the real last page instead of
@@ -86,7 +88,7 @@ export async function getProductsPage({
 
 export async function getCategoryPreviewImage(category: Category) {
   const product = await prisma.product.findFirst({
-    where: { category },
+    where: { category, published: true },
     orderBy: { createdAt: "desc" },
     select: { images: { orderBy: { position: "asc" }, take: 1 } },
   });
@@ -102,7 +104,7 @@ export async function getProductBySlug(slug: string) {
 
 export async function getRelatedProducts(category: Category, excludeSlug: string, take = 4) {
   const products = await prisma.product.findMany({
-    where: { category, slug: { not: excludeSlug }, sold: false },
+    where: { category, slug: { not: excludeSlug }, sold: false, published: true },
     orderBy: { createdAt: "desc" },
     take,
     select: cardSelect,

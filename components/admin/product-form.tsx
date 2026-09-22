@@ -25,6 +25,7 @@ export type ProductFormInitial = {
   condition: string | null;
   dimensions: string | null;
   sold: boolean;
+  published: boolean;
   images: { id: string; url: string }[];
 };
 
@@ -273,7 +274,22 @@ export function ProductForm({
           />
           Mark as Sold
         </label>
+        <label className="flex items-center gap-2 text-[13px] text-charcoal">
+          <input
+            type="checkbox"
+            name="published"
+            defaultChecked={initial ? initial.published : true}
+            className="accent-oxblood w-4 h-4"
+          />
+          Published (visible to customers)
+        </label>
       </fieldset>
+      {initial && !initial.published && (
+        <p className="-mt-6 text-[12px] text-bronze-dark">
+          This piece is a draft — it&apos;s hidden from the site and can&apos;t be bought until you
+          check &ldquo;Published.&rdquo;
+        </p>
+      )}
 
       {error && (
         <p className="text-[13px] text-oxblood" role="alert">

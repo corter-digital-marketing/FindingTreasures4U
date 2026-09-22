@@ -34,6 +34,7 @@ export default async function EditProductPage({
           condition: product.condition,
           dimensions: product.dimensions,
           sold: product.sold,
+          published: product.published,
           images: product.images,
         }}
       />

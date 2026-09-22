@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { ChevronRight, PackageCheck } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { ProductGallery } from "@/components/product-gallery";
@@ -11,6 +12,7 @@ import { ProductCard } from "@/components/product-card";
 import { categoryLabel, CATEGORIES } from "@/lib/categories";
 import { formatPrice } from "@/lib/format";
 import { getProductBySlug, getRelatedProducts } from "@/lib/products";
+import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
 
 export async function generateMetadata({
   params,
@@ -34,6 +36,14 @@ export default async function ProductPage({
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product) notFound();
+
+  if (!product.published) {
+    // Draft items are invisible to the public, but the owner can still open
+    // the direct link to preview one while logged into the admin.
+    const token = (await cookies()).get(SESSION_COOKIE)?.value;
+    const session = token ? await verifySessionToken(token) : null;
+    if (!session) notFound();
+  }
 
   const related = await getRelatedProducts(product.category, product.slug, 4);
   const categoryMeta = CATEGORIES.find((c) => c.value === product.category);

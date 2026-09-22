@@ -50,6 +50,7 @@ export const productSchema = z.object({
   condition: z.string().trim().optional(),
   dimensions: z.string().trim().optional(),
   sold: z.coerce.boolean().optional(),
+  published: z.coerce.boolean().optional(),
 });
 
 export type ProductInput = z.infer<typeof productSchema>;

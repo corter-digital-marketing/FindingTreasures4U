@@ -5,20 +5,26 @@ import { prisma } from "@/lib/prisma";
 import { CATEGORIES, categoryBySlug, categoryLabel } from "@/lib/categories";
 import { formatPrice } from "@/lib/format";
 import { Pagination } from "@/components/ui/pagination";
+import type { Prisma } from "@/app/generated/prisma";
 
 const PAGE_SIZE = 50;
 
 export default async function AdminProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; page?: string }>;
+  searchParams: Promise<{ category?: string; status?: string; page?: string }>;
 }) {
-  const { category: categorySlug, page: pageParam } = await searchParams;
+  const { category: categorySlug, status, page: pageParam } = await searchParams;
   const activeCategory = categorySlug ? categoryBySlug(categorySlug) : undefined;
+  const activeStatus = status === "draft" || status === "published" ? status : undefined;
   const page = Math.max(1, Number(pageParam) || 1);
-  const where = activeCategory ? { category: activeCategory.value } : undefined;
 
-  const [products, totalCount] = await Promise.all([
+  const where: Prisma.ProductWhereInput = {
+    ...(activeCategory ? { category: activeCategory.value } : {}),
+    ...(activeStatus ? { published: activeStatus === "published" } : {}),
+  };
+
+  const [products, totalCount, draftCount] = await Promise.all([
     prisma.product.findMany({
       where,
       orderBy: { createdAt: "desc" },
@@ -27,10 +33,14 @@ export default async function AdminProductsPage({
       take: PAGE_SIZE,
     }),
     prisma.product.count({ where }),
+    prisma.product.count({ where: { published: false } }),
   ]);
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
-  const basePath = activeCategory ? `/admin/products?category=${activeCategory.slug}` : "/admin/products";
+  const params = new URLSearchParams();
+  if (activeCategory) params.set("category", activeCategory.slug);
+  if (activeStatus) params.set("status", activeStatus);
+  const basePath = params.size > 0 ? `/admin/products?${params.toString()}` : "/admin/products";
 
   return (
     <div className="p-6 md:p-10">
@@ -52,11 +62,33 @@ export default async function AdminProductsPage({
         </Link>
       </div>
 
+      {draftCount > 0 && (
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          <Link
+            href="/admin/products?status=draft"
+            className={`px-4 py-2 text-[12px] uppercase tracking-[0.08em] border transition-colors ${
+              activeStatus === "draft"
+                ? "border-bronze-dark bg-bronze-dark text-ivory"
+                : "border-bronze text-bronze-dark hover:bg-ivory-dim"
+            }`}
+          >
+            Drafts ({draftCount}) — hidden from customers
+          </Link>
+          {activeStatus === "draft" && (
+            <Link
+              href="/admin/products"
+              className="text-[12px] text-charcoal-soft hover:text-charcoal link-underline"
+            >
+              Clear filter
+            </Link>
+          )}
+        </div>
+      )}
       <div className="flex flex-wrap items-center gap-2 mb-10">
         <Link
           href="/admin/products"
           className={`px-4 py-2 text-[12px] uppercase tracking-[0.08em] border transition-colors ${
-            !activeCategory
+            !activeCategory && !activeStatus
               ? "border-charcoal bg-charcoal text-ivory"
               : "border-line text-charcoal-soft hover:border-bronze-dark hover:text-charcoal"
           }`}
@@ -66,7 +98,7 @@ export default async function AdminProductsPage({
         {CATEGORIES.map((c) => (
           <Link
             key={c.slug}
-            href={`/admin/products?category=${c.slug}`}
+            href={`/admin/products?category=${c.slug}${activeStatus ? `&status=${activeStatus}` : ""}`}
             className={`px-4 py-2 text-[12px] uppercase tracking-[0.08em] border transition-colors ${
               activeCategory?.slug === c.slug
                 ? "border-charcoal bg-charcoal text-ivory"
@@ -111,6 +143,11 @@ export default async function AdminProductsPage({
                   </p>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
+                  {!p.published && (
+                    <span className="text-[10px] tracking-[0.1em] uppercase text-ivory bg-bronze-dark px-2 py-1">
+                      Draft
+                    </span>
+                  )}
                   {p.sold && (
                     <span className="text-[10px] tracking-[0.1em] uppercase text-ivory bg-charcoal px-2 py-1">
                       Sold

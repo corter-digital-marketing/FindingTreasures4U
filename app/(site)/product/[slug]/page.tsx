@@ -13,6 +13,7 @@ import { categoryLabel, CATEGORIES } from "@/lib/categories";
 import { formatPrice } from "@/lib/format";
 import { getProductBySlug, getRelatedProducts } from "@/lib/products";
 import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
+import { SITE_URL } from "@/lib/site";
 
 export async function generateMetadata({
   params,
@@ -22,9 +23,35 @@ export async function generateMetadata({
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product) return {};
+
+  if (!product.published) {
+    // Same visibility rule as the page itself — an unpublished draft's
+    // title/description shouldn't leak into <head> (and get indexed or
+    // shown in a social preview) just because its slug was guessed.
+    const token = (await cookies()).get(SESSION_COOKIE)?.value;
+    const session = token ? await verifySessionToken(token) : null;
+    if (!session) return {};
+  }
+
+  const title = `${product.name} | Finding Treasures 4 U`;
+  const image = product.images[0]?.url;
+
   return {
-    title: `${product.name} | Finding Treasures 4 U`,
+    title,
     description: product.description,
+    alternates: { canonical: `/product/${product.slug}` },
+    openGraph: {
+      title,
+      description: product.description,
+      type: "website",
+      images: image ? [{ url: image }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: product.description,
+      images: image ? [image] : undefined,
+    },
   };
 }
 
@@ -53,8 +80,28 @@ export default async function ProductPage({
     { label: "Condition", value: product.condition },
   ].filter((s) => s.value);
 
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    image: product.images.map((img) => img.url),
+    category: categoryLabel(product.category),
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "USD",
+      price: (product.priceCents / 100).toFixed(2),
+      availability: product.sold ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
+      url: `${SITE_URL}/product/${product.slug}`,
+    },
+  };
+
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
       <Container className="pt-6">
         <nav className="flex items-center gap-1.5 overflow-x-auto whitespace-nowrap text-[12px] text-charcoal-soft">
           <Link href="/products" className="shrink-0 hover:text-bronze-dark">

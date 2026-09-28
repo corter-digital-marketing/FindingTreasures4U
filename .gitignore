@@ -51,3 +51,6 @@ next-env.d.ts
 
 # raw bulk-import source files (Zophi PDF exports, etc.)
 /FT4U Items
+
+# tracks which Zophi PDFs have already been imported, to avoid duplicates
+/_import-manifest.json

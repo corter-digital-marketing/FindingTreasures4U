@@ -5,21 +5,32 @@ import { Container } from "@/components/ui/container";
 import { ProductCard } from "@/components/product-card";
 import { CategoryRow } from "@/components/category-row";
 import { AboutGallery } from "@/components/about-gallery";
+import { HeroGallery } from "@/components/hero-gallery";
 import { CATEGORIES } from "@/lib/categories";
 import { getCategoryPreviewImage, getNewArrivals, getProductsByCategory } from "@/lib/products";
 import { STORE_ADDRESS, STORE_PHONE } from "@/lib/store";
 
 export default async function HomePage() {
-  const [newArrivals, categoryImages, categoryProducts] = await Promise.all([
-    getNewArrivals(4),
+  const [recentArrivals, categoryImages, categoryProducts] = await Promise.all([
+    getNewArrivals(8),
     Promise.all(CATEGORIES.map((c) => getCategoryPreviewImage(c.value))),
     Promise.all(CATEGORIES.map((c) => getProductsByCategory(c.value, 4))),
   ]);
+
+  // Split so the hero rotation and the "New Arrivals" grid below it don't
+  // show the exact same photos back to back.
+  const newArrivals = recentArrivals.slice(0, 4);
+  const heroImages = recentArrivals
+    .slice(4)
+    .map((p) => p.image)
+    .filter((img): img is string => Boolean(img));
 
   return (
     <div>
       {/* Editorial hero */}
       <section className="relative h-[56vh] min-h-[420px] max-h-[620px] w-full overflow-hidden bg-charcoal">
+        <HeroGallery images={heroImages} />
+        <div className="absolute inset-0 bg-gradient-to-t from-charcoal/90 via-charcoal/40 to-charcoal/10" />
         <Container className="relative h-full flex flex-col justify-end pb-12 md:pb-16">
           <h1 className="font-serif-display text-ivory text-[2.25rem] leading-[1.05] sm:text-[2.75rem] md:text-[3.25rem] max-w-3xl">
             Antiques, uniques, and sought after items.

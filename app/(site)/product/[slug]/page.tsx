@@ -153,7 +153,7 @@ export default async function ProductPage({
                   }}
                 />
               ) : (
-                <ContactToPurchase productName={product.name} />
+                <ContactToPurchase />
               )}
             </div>
 

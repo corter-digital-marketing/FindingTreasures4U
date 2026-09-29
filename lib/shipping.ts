@@ -12,6 +12,7 @@ export const SHIPPING_TIERS: {
   shortLabel: string;
   cents: number | null;
 }[] = [
+  { value: "FREE", label: "Free Shipping", shortLabel: "Free", cents: 0 },
   { value: "SMALL", label: "Small — $16.90 shipping", shortLabel: "Small", cents: 1690 },
   { value: "MEDIUM", label: "Medium — $39.80 shipping", shortLabel: "Medium", cents: 3980 },
   { value: "LARGE", label: "Large — $45.65 shipping", shortLabel: "Large", cents: 4565 },

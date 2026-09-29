@@ -11,6 +11,9 @@ datasource db {
 }
 
 enum ShippingTier {
+  // No shipping charge at all — distinct from SMALL/MEDIUM/LARGE, which
+  // always carry their fixed rate.
+  FREE
   SMALL
   MEDIUM
   LARGE

@@ -2,7 +2,7 @@ import { Resend } from "resend";
 import { formatPrice } from "@/lib/format";
 import { STORE_ADDRESS } from "@/lib/store";
 
-const FROM_ADDRESS = "Finding Treasures 4 U <onboarding@resend.dev>";
+const FROM_ADDRESS = "Finding Treasures 4 U <orders@findingtreasures4u.com>";
 
 type OrderForEmail = {
   id: string;

@@ -9,9 +9,8 @@ import { Trash2 } from "lucide-react";
 import { Field, TextAreaField } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { CATEGORIES } from "@/lib/categories";
-import { SHIPPING_TIERS } from "@/lib/shipping";
 import { resizeImageForUpload } from "@/lib/client-image-resize";
-import type { Category, ShippingTier } from "@/app/generated/prisma";
+import type { Category } from "@/app/generated/prisma";
 
 type ActionState = { error: string } | { redirectTo: string } | null;
 
@@ -20,7 +19,8 @@ export type ProductFormInitial = {
   name: string;
   category: Category;
   priceCents: number;
-  shippingTier: ShippingTier;
+  shippingCents: number;
+  needsShippingQuote: boolean;
   description: string;
   condition: string | null;
   dimensions: string | null;
@@ -54,6 +54,7 @@ export function ProductForm({
   const [error, setError] = useState<string | null>(null);
   const [removedIds, setRemovedIds] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
+  const [needsShippingQuote, setNeedsShippingQuote] = useState(initial?.needsShippingQuote ?? false);
 
   const toggleRemove = (id: string) => {
     setRemovedIds((prev) => {
@@ -177,33 +178,35 @@ export function ProductForm({
             defaultValue={initial ? (initial.priceCents / 100).toFixed(2) : undefined}
           />
 
-          <label className="block">
-            <span className="text-[11px] tracking-[0.1em] uppercase text-charcoal-soft">
-              Shipping Size <span className="text-oxblood">*</span>
-            </span>
-            <select
-              name="shippingTier"
-              required
-              defaultValue={initial?.shippingTier ?? ""}
-              className="mt-2 w-full border-0 border-b border-line bg-transparent py-2 text-[15px] text-charcoal outline-none transition-colors focus:border-bronze-dark"
-            >
-              <option value="" disabled>
-                Select a shipping size
-              </option>
-              {SHIPPING_TIERS.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Field
+            label="Shipping Price (USD)"
+            name="shippingDollars"
+            type="number"
+            min="0"
+            step="0.01"
+            required
+            disabled={needsShippingQuote}
+            defaultValue={initial ? (initial.shippingCents / 100).toFixed(2) : undefined}
+          />
         </div>
-        <p className="-mt-3 text-[12px] text-charcoal-soft">
-          Shipping is a fixed rate by size — Small $16.90, Medium $39.80, Large $45.65. Really Big
-          Items sell normally at checkout for the item price alone; once you know the real
-          shipping cost, send the buyer a payment link for it from the order in Admin →
-          Orders.
-        </p>
+
+        <label className="flex items-start gap-2 text-[13px] text-charcoal">
+          <input
+            type="checkbox"
+            name="needsShippingQuote"
+            checked={needsShippingQuote}
+            onChange={(e) => setNeedsShippingQuote(e.target.checked)}
+            className="accent-oxblood w-4 h-4 mt-0.5"
+          />
+          <span>
+            Calculate shipping later
+            <span className="block text-[12px] text-charcoal-soft font-normal">
+              Sells now for the item price alone (the shipping price above is ignored). Once you
+              know the real cost, send the buyer a payment link for it from the order in Admin →
+              Orders.
+            </span>
+          </span>
+        </label>
 
         <TextAreaField
           label="Description"

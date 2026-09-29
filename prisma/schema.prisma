@@ -10,19 +10,6 @@ datasource db {
   provider = "postgresql"
 }
 
-enum ShippingTier {
-  // No shipping charge at all — distinct from SMALL/MEDIUM/LARGE, which
-  // always carry their fixed rate.
-  FREE
-  SMALL
-  MEDIUM
-  LARGE
-  // "Really big" items: shipping can't be quoted automatically, so these are
-  // not purchasable online at all — the product page shows a contact prompt
-  // instead of Add to Cart, and submitOrder refuses them server-side too.
-  CONTACT
-}
-
 enum Category {
   FURNISHINGS
   WEATHERVANES
@@ -45,26 +32,32 @@ enum OrderStatus {
 }
 
 model Product {
-  id            String       @id @default(cuid())
-  slug          String       @unique
-  name          String
-  category      Category
-  priceCents    Int
-  // Flat shipping charge for this piece, in cents. 0 means free shipping.
-  shippingCents Int          @default(0)
-  shippingTier  ShippingTier @default(SMALL)
+  id                 String   @id @default(cuid())
+  slug               String   @unique
+  name               String
+  category           Category
+  priceCents         Int
+  // Flat shipping charge for this piece, in cents — set directly by the
+  // admin, in dollars, on the product form. Meaningless (kept at 0) when
+  // needsShippingQuote is true.
+  shippingCents      Int      @default(0)
+  // When true: sold at checkout for the item price alone; shipping is
+  // quoted and charged separately afterward (see the admin "Send Shipping
+  // Quote" action and Order.needsShippingQuote). When false, shippingCents
+  // above is charged automatically at checkout.
+  needsShippingQuote Boolean  @default(false)
   // Hidden from the public site entirely (listings, category pages, direct
   // product URL for non-admins) until the owner flips this on. Defaults to
   // true so the normal one-at-a-time admin flow is unaffected; bulk imports
   // set this false so hundreds of items can be reviewed before going live.
-  published     Boolean      @default(true)
-  description   String
-  condition     String?
-  dimensions    String?
-  featured      Boolean      @default(false)
-  sold          Boolean      @default(false)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  published          Boolean  @default(true)
+  description        String
+  condition          String?
+  dimensions         String?
+  featured           Boolean  @default(false)
+  sold               Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   images     ProductImage[]
   orderItems OrderItem[]

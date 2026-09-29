@@ -43,9 +43,10 @@ export const productSchema = z.object({
     message: "Please choose a category.",
   }),
   priceDollars: z.coerce.number().positive("Please enter a price greater than 0."),
-  shippingTier: z.enum(["FREE", "SMALL", "MEDIUM", "LARGE", "CONTACT"], {
-    message: "Please choose a shipping size.",
-  }),
+  // Ignored server-side when needsShippingQuote is true, but always
+  // validated as a real number so the form has one consistent shape.
+  shippingDollars: z.coerce.number().min(0, "Shipping can't be negative — enter 0 for free shipping."),
+  needsShippingQuote: z.coerce.boolean().optional(),
   description: z.string().trim().min(10, "Please add a short description."),
   condition: z.string().trim().optional(),
   dimensions: z.string().trim().optional(),

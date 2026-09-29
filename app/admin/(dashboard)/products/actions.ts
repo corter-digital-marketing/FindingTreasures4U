@@ -5,7 +5,6 @@ import { prisma } from "@/lib/prisma";
 import { productSchema } from "@/lib/validation";
 import { generateUniqueSlug } from "@/lib/slug";
 import { deleteUploadedImages } from "@/lib/uploads";
-import { shippingCentsForTier } from "@/lib/shipping";
 import { safeRevalidatePath } from "@/lib/revalidate";
 
 type ActionState = { error: string } | { redirectTo: string } | null;
@@ -15,7 +14,8 @@ function parseProductForm(formData: FormData) {
     name: formData.get("name"),
     category: formData.get("category"),
     priceDollars: formData.get("priceDollars"),
-    shippingTier: formData.get("shippingTier"),
+    shippingDollars: formData.get("shippingDollars"),
+    needsShippingQuote: formData.get("needsShippingQuote") === "on",
     description: formData.get("description"),
     condition: formData.get("condition"),
     dimensions: formData.get("dimensions"),
@@ -23,6 +23,14 @@ function parseProductForm(formData: FormData) {
     published: formData.get("published") === "on",
     featured: formData.get("featured") === "on",
   });
+}
+
+// Shipping is either a flat dollar amount charged at checkout, or "quoted
+// later" (charged $0 now; the admin sends a real cost after purchase via
+// the Orders page) — never both, so the entered price is ignored either way
+// once needsShippingQuote is on, rather than silently double-charging.
+function resolveShippingCents(data: { shippingDollars: number; needsShippingQuote?: boolean }): number {
+  return data.needsShippingQuote ? 0 : Math.round(data.shippingDollars * 100);
 }
 
 // Photos are uploaded directly from the browser to Blob storage before this
@@ -54,8 +62,8 @@ export async function createProduct(
       name: parsed.data.name,
       category: parsed.data.category,
       priceCents: Math.round(parsed.data.priceDollars * 100),
-      shippingTier: parsed.data.shippingTier,
-      shippingCents: shippingCentsForTier(parsed.data.shippingTier),
+      shippingCents: resolveShippingCents(parsed.data),
+      needsShippingQuote: !!parsed.data.needsShippingQuote,
       description: parsed.data.description,
       condition: parsed.data.condition || null,
       dimensions: parsed.data.dimensions || null,
@@ -110,8 +118,8 @@ export async function updateProduct(
         name: parsed.data.name,
         category: parsed.data.category,
         priceCents: Math.round(parsed.data.priceDollars * 100),
-        shippingTier: parsed.data.shippingTier,
-        shippingCents: shippingCentsForTier(parsed.data.shippingTier),
+        shippingCents: resolveShippingCents(parsed.data),
+        needsShippingQuote: !!parsed.data.needsShippingQuote,
         description: parsed.data.description,
         condition: parsed.data.condition || null,
         dimensions: parsed.data.dimensions || null,

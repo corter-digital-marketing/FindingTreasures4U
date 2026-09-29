@@ -51,7 +51,7 @@ export async function submitOrder(
   // Shipping is summed from what's stored in the database, never from
   // anything the browser sent — the cart's copy is display-only.
   const subtotalCents = products.reduce((sum, p) => sum + p.priceCents, 0);
-  // In-store pickup never pays shipping. CONTACT-tier items store
+  // In-store pickup never pays shipping. Quote-later items store
   // shippingCents as 0 (their real cost isn't known yet), so they're
   // naturally excluded from this sum without any special-casing here.
   const shippingCents = isPickup ? 0 : products.reduce((sum, p) => sum + p.shippingCents, 0);
@@ -59,9 +59,9 @@ export async function submitOrder(
 
   // "Contact for Price" items are bought now for the item price alone —
   // shipping gets quoted and charged separately afterward. Only relevant
-  // when actually shipping; a CONTACT item picked up in person has no
+  // when actually shipping; a quote-later item picked up in person has no
   // shipping to quote at all.
-  const needsShippingQuote = !isPickup && products.some((p) => p.shippingTier === "CONTACT");
+  const needsShippingQuote = !isPickup && products.some((p) => p.needsShippingQuote);
 
   // The order is created up front so we have something for the Stripe
   // session to reference, but products are NOT marked sold here — that only

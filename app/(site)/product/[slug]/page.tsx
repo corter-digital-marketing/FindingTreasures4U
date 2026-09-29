@@ -129,7 +129,7 @@ export default async function ProductPage({
             <p className="mt-5 text-[22px] text-charcoal tabular-nums">
               {formatPrice(product.priceCents)}
             </p>
-            {product.shippingTier === "CONTACT" ? (
+            {product.needsShippingQuote ? (
               <p className="mt-1 text-[13px] text-charcoal-soft">
                 Shipping quoted after purchase, or free in-store pickup
               </p>
@@ -150,12 +150,12 @@ export default async function ProductPage({
                   name: product.name,
                   priceCents: product.priceCents,
                   shippingCents: product.shippingCents,
-                  needsShippingQuote: product.shippingTier === "CONTACT",
+                  needsShippingQuote: product.needsShippingQuote,
                   image: product.images[0]?.url ?? null,
                   category: product.category,
                 }}
               />
-              {product.shippingTier === "CONTACT" && <ContactToPurchase />}
+              {product.needsShippingQuote && <ContactToPurchase />}
             </div>
 
             <div className="hairline mt-10 mb-8" />

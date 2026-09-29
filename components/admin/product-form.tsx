@@ -26,6 +26,7 @@ export type ProductFormInitial = {
   dimensions: string | null;
   sold: boolean;
   published: boolean;
+  featured: boolean;
   images: { id: string; url: string }[];
 };
 
@@ -283,11 +284,25 @@ export function ProductForm({
           />
           Published (visible to customers)
         </label>
+        <label className="flex items-center gap-2 text-[13px] text-charcoal">
+          <input
+            type="checkbox"
+            name="featured"
+            defaultChecked={initial?.featured}
+            className="accent-oxblood w-4 h-4"
+          />
+          Featured (category photo)
+        </label>
       </fieldset>
       {initial && !initial.published && (
         <p className="-mt-6 text-[12px] text-bronze-dark">
           This piece is a draft — it&apos;s hidden from the site and can&apos;t be bought until you
           check &ldquo;Published.&rdquo;
+        </p>
+      )}
+      {initial?.featured && (
+        <p className="-mt-6 text-[12px] text-charcoal-soft">
+          This piece&apos;s photo is used for its category&apos;s tile on the homepage.
         </p>
       )}
 

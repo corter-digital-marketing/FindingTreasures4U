@@ -51,6 +51,7 @@ export const productSchema = z.object({
   dimensions: z.string().trim().optional(),
   sold: z.coerce.boolean().optional(),
   published: z.coerce.boolean().optional(),
+  featured: z.coerce.boolean().optional(),
 });
 
 export type ProductInput = z.infer<typeof productSchema>;

@@ -87,11 +87,19 @@ export async function getProductsPage({
 }
 
 export async function getCategoryPreviewImage(category: Category) {
-  const product = await prisma.product.findFirst({
-    where: { category, published: true },
-    orderBy: { createdAt: "desc" },
-    select: { images: { orderBy: { position: "asc" }, take: 1 } },
-  });
+  // A manually featured product wins if one's set for this category;
+  // otherwise falls back to the most recently added one, as before.
+  const product =
+    (await prisma.product.findFirst({
+      where: { category, published: true, featured: true },
+      orderBy: { createdAt: "desc" },
+      select: { images: { orderBy: { position: "asc" }, take: 1 } },
+    })) ??
+    (await prisma.product.findFirst({
+      where: { category, published: true },
+      orderBy: { createdAt: "desc" },
+      select: { images: { orderBy: { position: "asc" }, take: 1 } },
+    }));
   return product?.images[0]?.url ?? null;
 }
 

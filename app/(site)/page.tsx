@@ -20,6 +20,17 @@ export default async function HomePage() {
     <div>
       {/* Editorial hero */}
       <section className="relative h-[56vh] min-h-[420px] max-h-[620px] w-full overflow-hidden bg-charcoal">
+        <video
+          className="absolute inset-0 w-full h-full object-cover"
+          src="/video/hero-banner.mp4"
+          poster="/video/hero-banner-poster.jpg"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-charcoal/85 via-charcoal/35 to-charcoal/10" />
         <Container className="relative h-full flex flex-col justify-end pb-12 md:pb-16">
           <h1 className="font-serif-display text-ivory text-[2.25rem] leading-[1.05] sm:text-[2.75rem] md:text-[3.25rem] max-w-3xl">
             Antiques, uniques, and sought after items.

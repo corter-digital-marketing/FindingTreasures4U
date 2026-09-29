@@ -54,3 +54,6 @@ next-env.d.ts
 
 # tracks which Zophi PDFs have already been imported, to avoid duplicates
 /_import-manifest.json
+
+# raw uploaded video source (the optimized version lives in /public/video)
+/video

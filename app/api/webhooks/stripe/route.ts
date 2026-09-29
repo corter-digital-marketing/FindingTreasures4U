@@ -3,7 +3,11 @@ import type Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { safeRevalidatePath } from "@/lib/revalidate";
-import { sendOrderConfirmationToCustomer, sendOrderNotificationToOwner } from "@/lib/email";
+import {
+  sendOrderConfirmationToCustomer,
+  sendOrderNotificationToOwner,
+  sendShippingQuotePaidNotification,
+} from "@/lib/email";
 
 /**
  * Stripe sends this once a checkout session actually completes payment.
@@ -54,6 +58,26 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   if (!order) {
     console.error("Stripe webhook: no matching order for session", session.id, orderId);
+    return NextResponse.json({ received: true });
+  }
+
+  // A "Contact for Price" shipping payment is a separate charge, on the same
+  // order, matched by metadata rather than by comparing session IDs — that
+  // way it's still found correctly even if the admin re-sent a corrected
+  // quote (a fresh session, same orderId) after the customer already opened
+  // an older email.
+  if (session.metadata?.kind === "shipping_quote") {
+    if (order.shippingQuotePaidAt) {
+      return NextResponse.json({ received: true }); // already processed
+    }
+    await prisma.order.update({
+      where: { id: order.id },
+      data: { shippingQuotePaidAt: new Date() },
+    });
+    safeRevalidatePath("/", "layout");
+    if (order.shippingQuoteCents !== null) {
+      await sendShippingQuotePaidNotification(order, order.shippingQuoteCents);
+    }
     return NextResponse.json({ received: true });
   }
 

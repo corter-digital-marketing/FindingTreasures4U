@@ -1,11 +1,25 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CheckCircle2, Clock } from "lucide-react";
+import { CheckCircle2, Clock, Truck } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { ClearCartOnMount } from "@/components/clear-cart-on-mount";
+import { buttonClassName } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
+import { stripe } from "@/lib/stripe";
 import { formatPrice, formatDate } from "@/lib/format";
 import { STORE_ADDRESS } from "@/lib/store";
+
+async function getShippingQuotePaymentUrl(sessionId: string): Promise<string | null> {
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    // Only useful while still open — an expired/completed session's URL
+    // won't accept a new payment.
+    return session.status === "open" ? (session.url ?? null) : null;
+  } catch (error) {
+    console.error("Failed to retrieve shipping quote session:", error);
+    return null;
+  }
+}
 
 export default async function OrderConfirmationPage({
   params,
@@ -25,6 +39,11 @@ export default async function OrderConfirmationPage({
   // assume "paid" just because the customer reached it.
   const isPaid = order.status === "PAID" || order.status === "FULFILLED";
   const isPickup = order.deliveryMethod === "PICKUP";
+
+  const shippingQuotePaymentUrl =
+    order.needsShippingQuote && order.shippingQuoteSentAt && !order.shippingQuotePaidAt && order.shippingQuoteCheckoutSessionId
+      ? await getShippingQuotePaymentUrl(order.shippingQuoteCheckoutSessionId)
+      : null;
 
   return (
     <Container className="py-20 md:py-28 max-w-2xl">
@@ -86,6 +105,44 @@ export default async function OrderConfirmationPage({
           <span className="text-charcoal tabular-nums">{formatPrice(order.totalCents)}</span>
         </div>
       </div>
+
+      {isPaid && order.needsShippingQuote && (
+        <div className="mt-8 border border-line bg-ivory-dim p-6">
+          <div className="flex items-start gap-3">
+            <Truck className="w-5 h-5 mt-0.5 text-bronze-dark shrink-0" strokeWidth={1.25} />
+            <div>
+              <h2 className="text-[13px] tracking-[0.06em] uppercase text-charcoal mb-1.5">
+                Shipping
+              </h2>
+              {order.shippingQuotePaidAt ? (
+                <p className="text-[14px] text-charcoal-soft">
+                  Shipping payment of{" "}
+                  <span className="text-charcoal">{formatPrice(order.shippingQuoteCents ?? 0)}</span>{" "}
+                  received — thank you. We&apos;ll be in touch to arrange delivery.
+                </p>
+              ) : order.shippingQuoteSentAt ? (
+                <>
+                  <p className="text-[14px] text-charcoal-soft">
+                    Shipping for this order is{" "}
+                    <span className="text-charcoal">{formatPrice(order.shippingQuoteCents ?? 0)}</span>.
+                    We&apos;ve emailed {order.email} a secure payment link.
+                  </p>
+                  {shippingQuotePaymentUrl && (
+                    <a href={shippingQuotePaymentUrl} className={buttonClassName("primary", "mt-4")}>
+                      Pay Shipping Now
+                    </a>
+                  )}
+                </>
+              ) : (
+                <p className="text-[14px] text-charcoal-soft">
+                  This piece requires special shipping arrangements. We&apos;ll be in touch soon
+                  with a shipping cost and a secure payment link.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-8 text-[13px]">
         <div>

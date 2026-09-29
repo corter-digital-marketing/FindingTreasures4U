@@ -96,6 +96,78 @@ export async function sendOrderNotificationToOwner(order: OrderForEmail): Promis
   }
 }
 
+type ShippingQuoteEmailOrder = {
+  id: string;
+  customerName: string;
+  email: string;
+  items: { nameSnapshot: string }[];
+};
+
+/** Sent to the customer when the owner sends a shipping cost + payment link. */
+export async function sendShippingQuoteEmail(
+  order: ShippingQuoteEmailOrder,
+  checkoutUrl: string,
+  quoteCents: number
+): Promise<void> {
+  const resend = resendClient();
+  if (!resend) return;
+
+  const itemNames = order.items.map((i) => i.nameSnapshot).join(", ");
+
+  try {
+    await resend.emails.send({
+      from: FROM_ADDRESS,
+      to: order.email,
+      subject: `Shipping is ready for your order — ${formatPrice(quoteCents)}`,
+      html: `
+        <div style="font-family:sans-serif;color:#241f19;">
+          <h2 style="margin:0 0 12px;">Hi ${order.customerName.split(" ")[0]}, shipping is arranged.</h2>
+          <p>We've worked out shipping for <strong>${itemNames}</strong>. The cost is
+          <strong>${formatPrice(quoteCents)}</strong> — pay securely below and we'll get it on its way.</p>
+          <p style="margin:24px 0;">
+            <a href="${checkoutUrl}" style="background:#6c2a33;color:#f7f2e7;padding:12px 24px;text-decoration:none;border-radius:2px;display:inline-block;">
+              Pay Shipping — ${formatPrice(quoteCents)}
+            </a>
+          </p>
+          <p style="color:#6a5f4f;font-size:13px;">Order reference: ${order.id}</p>
+        </div>
+      `,
+    });
+  } catch (error) {
+    console.error("Failed to send shipping quote email:", error);
+  }
+}
+
+/** Sent once the customer actually pays the shipping quote. */
+export async function sendShippingQuotePaidNotification(
+  order: ShippingQuoteEmailOrder,
+  quoteCents: number
+): Promise<void> {
+  const to = process.env.ORDER_NOTIFICATION_EMAIL ?? process.env.ADMIN_EMAIL;
+  if (!to) return;
+
+  const resend = resendClient();
+  if (!resend) return;
+
+  try {
+    await resend.emails.send({
+      from: FROM_ADDRESS,
+      to,
+      subject: `Shipping paid — ${order.customerName} (${formatPrice(quoteCents)})`,
+      html: `
+        <div style="font-family:sans-serif;color:#241f19;">
+          <h2 style="margin:0 0 12px;">Shipping Payment Received</h2>
+          <p><strong>${order.customerName}</strong> paid ${formatPrice(quoteCents)} for shipping on:
+          ${order.items.map((i) => i.nameSnapshot).join(", ")}.</p>
+          <p style="color:#6a5f4f;font-size:13px;">Order ID: ${order.id}</p>
+        </div>
+      `,
+    });
+  } catch (error) {
+    console.error("Failed to send shipping-quote-paid notification:", error);
+  }
+}
+
 export async function sendOrderConfirmationToCustomer(order: OrderForEmail): Promise<void> {
   const resend = resendClient();
   if (!resend) return;

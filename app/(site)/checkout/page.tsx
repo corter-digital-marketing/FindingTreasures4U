@@ -13,7 +13,8 @@ import { STORE_ADDRESS } from "@/lib/store";
 import { submitOrder } from "./actions";
 
 export default function CheckoutPage() {
-  const { items, subtotalCents, shippingCents: cartShippingCents, ready } = useCart();
+  const { items, subtotalCents, shippingCents: cartShippingCents, hasShippingQuoteItem, ready } =
+    useCart();
   const [deliveryMethod, setDeliveryMethod] = useState<"SHIPPING" | "PICKUP">("SHIPPING");
   const isPickup = deliveryMethod === "PICKUP";
   // Display only — the server recomputes shipping from the database.
@@ -93,8 +94,9 @@ export default function CheckoutPage() {
                   {
                     value: "SHIPPING",
                     title: "Ship to me",
-                    detail:
-                      cartShippingCents > 0
+                    detail: hasShippingQuoteItem
+                      ? "Shipping quoted after purchase"
+                      : cartShippingCents > 0
                         ? `${formatPrice(cartShippingCents)} shipping`
                         : "Free shipping",
                   },
@@ -221,9 +223,19 @@ export default function CheckoutPage() {
             <div className="mt-2 flex items-center justify-between text-[14px] text-charcoal">
               <span>{isPickup ? "Store pickup" : "Shipping"}</span>
               <span className="tabular-nums">
-                {shippingCents > 0 ? formatPrice(shippingCents) : "Free"}
+                {!isPickup && hasShippingQuoteItem
+                  ? "Quoted later"
+                  : shippingCents > 0
+                    ? formatPrice(shippingCents)
+                    : "Free"}
               </span>
             </div>
+            {!isPickup && hasShippingQuoteItem && (
+              <p className="mt-2 text-[12px] leading-relaxed text-charcoal-soft">
+                One or more items need a custom shipping quote — you&apos;ll pay for those now and
+                we&apos;ll email a separate payment link for shipping once it&apos;s arranged.
+              </p>
+            )}
             <div className="hairline my-4" />
             <div className="flex items-center justify-between text-[15px] text-charcoal">
               <span>Total</span>

@@ -95,12 +95,24 @@ model Order {
   country                 String
   notes                   String?
   shippingCents           Int            @default(0)
-  // Charged amount: items subtotal plus shippingCents.
+  // Charged amount: items subtotal plus shippingCents. Does NOT include
+  // shippingQuoteCents below — that's collected as a separate charge.
   totalCents              Int
   stripeCheckoutSessionId String?        @unique
   stripePaymentIntentId   String?
   paidAt                  DateTime?
   createdAt               DateTime       @default(now())
+
+  // "Contact for Price" items (large/awkward-to-ship pieces) are bought at
+  // checkout for the item price alone — shipping isn't known yet. When set,
+  // the admin can enter a shipping cost once determined; that generates a
+  // separate Stripe Checkout Session and emails the customer a payment link
+  // for just that amount, tracked by the fields below.
+  needsShippingQuote             Boolean   @default(false)
+  shippingQuoteCents             Int?
+  shippingQuoteCheckoutSessionId String?   @unique
+  shippingQuoteSentAt            DateTime?
+  shippingQuotePaidAt            DateTime?
 
   items OrderItem[]
 }

@@ -10,7 +10,8 @@ import { formatPrice } from "@/lib/format";
 import type { Category } from "@/app/generated/prisma";
 
 export default function CartPage() {
-  const { items, removeItem, subtotalCents, shippingCents, totalCents, ready } = useCart();
+  const { items, removeItem, subtotalCents, shippingCents, totalCents, hasShippingQuoteItem, ready } =
+    useCart();
 
   return (
     <Container className="py-14 md:py-20">
@@ -82,13 +83,25 @@ export default function CartPage() {
               <div className="mt-2 flex items-center justify-between text-[14px] text-charcoal">
                 <span>Shipping</span>
                 <span className="tabular-nums">
-                  {shippingCents > 0 ? formatPrice(shippingCents) : "Free"}
+                  {hasShippingQuoteItem
+                    ? "Quoted later"
+                    : shippingCents > 0
+                      ? formatPrice(shippingCents)
+                      : "Free"}
                 </span>
               </div>
-              {shippingCents > 0 && (
+              {hasShippingQuoteItem ? (
                 <p className="mt-2 text-[12px] leading-relaxed text-charcoal-soft">
-                  Shipping is free if you choose in-store pickup at checkout.
+                  One or more items need a custom shipping quote — you&apos;ll pay for those now
+                  and we&apos;ll email a separate payment link for shipping once it&apos;s
+                  arranged (or pick up in store for free).
                 </p>
+              ) : (
+                shippingCents > 0 && (
+                  <p className="mt-2 text-[12px] leading-relaxed text-charcoal-soft">
+                    Shipping is free if you choose in-store pickup at checkout.
+                  </p>
+                )
               )}
               <div className="hairline my-4" />
               <div className="flex items-center justify-between text-[15px] text-charcoal">

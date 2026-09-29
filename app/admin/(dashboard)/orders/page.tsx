@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatPrice } from "@/lib/format";
 import { OrderStatusSelect } from "@/components/admin/order-status-select";
+import { ShippingQuoteForm } from "@/components/admin/shipping-quote-form";
 import { STORE_ADDRESS } from "@/lib/store";
 import { PAID_ORDERS_WHERE } from "@/lib/orders";
 
@@ -93,6 +94,15 @@ export default async function AdminOrdersPage() {
                   )}
                 </div>
               </div>
+
+              {order.needsShippingQuote && (
+                <ShippingQuoteForm
+                  orderId={order.id}
+                  shippingQuoteCents={order.shippingQuoteCents}
+                  shippingQuoteSentAt={order.shippingQuoteSentAt}
+                  shippingQuotePaidAt={order.shippingQuotePaidAt}
+                />
+              )}
             </div>
           ))}
         </div>

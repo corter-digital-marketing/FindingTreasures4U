@@ -199,9 +199,9 @@ export function ProductForm({
         </div>
         <p className="-mt-3 text-[12px] text-charcoal-soft">
           Shipping is a fixed rate by size — Small $16.90, Medium $39.80, Large $45.65. Really Big
-          Items aren&apos;t sold through the site at all: the product page shows a
-          &ldquo;Contact Us&rdquo; prompt instead of Add to Cart, so the buyer arranges shipping
-          directly with you.
+          Items sell normally at checkout for the item price alone; once you know the real
+          shipping cost, send the buyer a payment link for it from the order in Admin →
+          Orders.
         </p>
 
         <TextAreaField

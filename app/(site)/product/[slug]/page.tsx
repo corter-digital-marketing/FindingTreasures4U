@@ -7,7 +7,6 @@ import { Container } from "@/components/ui/container";
 import { ProductGallery } from "@/components/product-gallery";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { ContactToPurchase } from "@/components/contact-to-purchase";
-import { isPurchasableTier } from "@/lib/shipping";
 import { ProductCard } from "@/components/product-card";
 import { categoryLabel, CATEGORIES } from "@/lib/categories";
 import { formatPrice } from "@/lib/format";
@@ -130,7 +129,11 @@ export default async function ProductPage({
             <p className="mt-5 text-[22px] text-charcoal tabular-nums">
               {formatPrice(product.priceCents)}
             </p>
-            {isPurchasableTier(product.shippingTier) && (
+            {product.shippingTier === "CONTACT" ? (
+              <p className="mt-1 text-[13px] text-charcoal-soft">
+                Shipping quoted after purchase, or free in-store pickup
+              </p>
+            ) : (
               <p className="mt-1 text-[13px] text-charcoal-soft">
                 {product.shippingCents > 0
                   ? `+ ${formatPrice(product.shippingCents)} shipping, or free in-store pickup`
@@ -139,22 +142,20 @@ export default async function ProductPage({
             )}
 
             <div className="mt-8">
-              {isPurchasableTier(product.shippingTier) ? (
-                <AddToCartButton
-                  sold={product.sold}
-                  item={{
-                    id: product.id,
-                    slug: product.slug,
-                    name: product.name,
-                    priceCents: product.priceCents,
-                    shippingCents: product.shippingCents,
-                    image: product.images[0]?.url ?? null,
-                    category: product.category,
-                  }}
-                />
-              ) : (
-                <ContactToPurchase />
-              )}
+              <AddToCartButton
+                sold={product.sold}
+                item={{
+                  id: product.id,
+                  slug: product.slug,
+                  name: product.name,
+                  priceCents: product.priceCents,
+                  shippingCents: product.shippingCents,
+                  needsShippingQuote: product.shippingTier === "CONTACT",
+                  image: product.images[0]?.url ?? null,
+                  category: product.category,
+                }}
+              />
+              {product.shippingTier === "CONTACT" && <ContactToPurchase />}
             </div>
 
             <div className="hairline mt-10 mb-8" />

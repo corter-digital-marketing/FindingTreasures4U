@@ -16,6 +16,10 @@ export type CartItem = {
   priceCents: number;
   // Optional so carts saved in localStorage before shipping existed still load.
   shippingCents?: number;
+  // "Contact for Price" items: shippingCents is 0 here not because shipping
+  // is free, but because it isn't known yet — quoted and charged separately
+  // after purchase. Optional for the same backward-compatibility reason.
+  needsShippingQuote?: boolean;
   image: string | null;
   category: string;
 };
@@ -29,6 +33,7 @@ type CartContextValue = {
   subtotalCents: number;
   shippingCents: number;
   totalCents: number;
+  hasShippingQuoteItem: boolean;
   ready: boolean;
 };
 
@@ -81,6 +86,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const totalCents = subtotalCents + shippingCents;
 
+  const hasShippingQuoteItem = useMemo(
+    () => items.some((i) => i.needsShippingQuote),
+    [items]
+  );
+
   return (
     <CartContext.Provider
       value={{
@@ -92,6 +102,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         subtotalCents,
         shippingCents,
         totalCents,
+        hasShippingQuoteItem,
         ready,
       }}
     >

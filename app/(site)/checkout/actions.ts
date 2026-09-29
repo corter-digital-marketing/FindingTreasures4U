@@ -4,7 +4,6 @@ import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { checkoutSchema } from "@/lib/validation";
 import { stripe } from "@/lib/stripe";
-import { isPurchasableTier } from "@/lib/shipping";
 
 async function getSiteOrigin(): Promise<string> {
   try {
@@ -44,15 +43,6 @@ export async function submitOrder(
     return { error: `"${alreadySold.name}" has just sold and is no longer available.` };
   }
 
-  // Defense in depth — the product page never offers Add to Cart for these,
-  // but the cart is client-side state, so a request could still name one.
-  const needsContact = products.find((p) => !isPurchasableTier(p.shippingTier));
-  if (needsContact) {
-    return {
-      error: `"${needsContact.name}" requires contacting us directly to purchase — it isn't sold through checkout.`,
-    };
-  }
-
   const unpublished = products.find((p) => !p.published);
   if (unpublished) {
     return { error: `"${unpublished.name}" isn't available for purchase yet.` };
@@ -61,9 +51,17 @@ export async function submitOrder(
   // Shipping is summed from what's stored in the database, never from
   // anything the browser sent — the cart's copy is display-only.
   const subtotalCents = products.reduce((sum, p) => sum + p.priceCents, 0);
-  // In-store pickup never pays shipping.
+  // In-store pickup never pays shipping. CONTACT-tier items store
+  // shippingCents as 0 (their real cost isn't known yet), so they're
+  // naturally excluded from this sum without any special-casing here.
   const shippingCents = isPickup ? 0 : products.reduce((sum, p) => sum + p.shippingCents, 0);
   const totalCents = subtotalCents + shippingCents;
+
+  // "Contact for Price" items are bought now for the item price alone —
+  // shipping gets quoted and charged separately afterward. Only relevant
+  // when actually shipping; a CONTACT item picked up in person has no
+  // shipping to quote at all.
+  const needsShippingQuote = !isPickup && products.some((p) => p.shippingTier === "CONTACT");
 
   // The order is created up front so we have something for the Stripe
   // session to reference, but products are NOT marked sold here — that only
@@ -88,6 +86,7 @@ export async function submitOrder(
       country: isPickup ? "" : (contact.country ?? ""),
       shippingCents,
       totalCents,
+      needsShippingQuote,
       items: {
         create: products.map((p) => ({
           productId: p.id,

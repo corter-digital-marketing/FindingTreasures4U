@@ -111,7 +111,7 @@ export default async function HomePage() {
             </div>
             <Link
               href="/products"
-              className="link-underline hidden sm:inline-flex items-center gap-1.5 text-[12px] tracking-[0.14em] uppercase text-charcoal"
+              className="link-underline inline-flex items-center gap-1.5 text-[12px] tracking-[0.14em] uppercase text-charcoal shrink-0"
             >
               View All <ArrowUpRight className="w-3.5 h-3.5" strokeWidth={1.5} />
             </Link>

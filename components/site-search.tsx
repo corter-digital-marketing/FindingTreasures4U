@@ -1,6 +1,12 @@
 import { Search } from "lucide-react";
 
-export function SiteSearch({ className = "" }: { className?: string }) {
+export function SiteSearch({
+  className = "",
+  autoFocus = false,
+}: {
+  className?: string;
+  autoFocus?: boolean;
+}) {
   return (
     <form action="/products" method="get" role="search" className={`relative ${className}`}>
       <label htmlFor="site-search" className="sr-only">
@@ -10,6 +16,7 @@ export function SiteSearch({ className = "" }: { className?: string }) {
         id="site-search"
         type="search"
         name="q"
+        autoFocus={autoFocus}
         placeholder="Search the collection"
         maxLength={100}
         className="w-full border-0 border-b border-line bg-transparent py-1.5 pr-7 text-[14px] text-charcoal placeholder:text-charcoal-soft/70 outline-none transition-colors focus:border-bronze-dark"

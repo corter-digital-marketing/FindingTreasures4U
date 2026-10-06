@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Menu, ShoppingCart, X } from "lucide-react";
+import { Menu, Search, ShoppingCart, X } from "lucide-react";
 import { CATEGORIES } from "@/lib/categories";
 import { useCart } from "@/components/cart-provider";
 import { SiteSearch } from "@/components/site-search";
@@ -17,7 +17,12 @@ const NAV_LINKS = [
 export function SiteHeader() {
   const pathname = usePathname();
   const { items, ready } = useCart();
-  const [open, setOpen] = useState(false);
+  // Panels remember the path they were opened on, so navigating anywhere
+  // closes them without needing an effect to reset state.
+  const [menuPath, setMenuPath] = useState<string | null>(null);
+  const [searchPath, setSearchPath] = useState<string | null>(null);
+  const open = menuPath !== null && menuPath === pathname;
+  const searchOpen = searchPath !== null && searchPath === pathname;
 
   return (
     <header className="sticky top-0 z-50 bg-ivory/95 backdrop-blur-sm">
@@ -43,27 +48,19 @@ export function SiteHeader() {
               </span>
             </Link>
 
-            <nav className="hidden 2xl:flex items-center gap-6">
-              {NAV_LINKS.map((link) => {
-                const active =
-                  link.href !== "/#about" &&
-                  (pathname === link.href ||
-                    (link.href !== "/products" && pathname?.startsWith(link.href)));
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`link-underline text-[12px] tracking-[0.14em] uppercase transition-colors ${
-                      active ? "text-oxblood" : "text-charcoal hover:text-bronze-dark"
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
-            </nav>
-
             <div className="flex shrink-0 items-center gap-5">
+              <button
+                aria-label={searchOpen ? "Close search" : "Open search"}
+                aria-expanded={searchOpen}
+                onClick={() => setSearchPath(searchOpen ? null : pathname)}
+                className="p-2 text-charcoal hover:text-bronze-dark transition-colors"
+              >
+                {searchOpen ? (
+                  <X className="w-5 h-5" strokeWidth={1.5} />
+                ) : (
+                  <Search className="w-5 h-5" strokeWidth={1.5} />
+                )}
+              </button>
               <Link
                 href="/cart"
                 aria-label={`Cart, ${items.length} item${items.length === 1 ? "" : "s"}`}
@@ -78,8 +75,9 @@ export function SiteHeader() {
               </Link>
               <button
                 aria-label={open ? "Close menu" : "Open menu"}
-                onClick={() => setOpen((v) => !v)}
-                className="2xl:hidden p-2 -mr-2 text-charcoal"
+                aria-expanded={open}
+                onClick={() => setMenuPath(open ? null : pathname)}
+                className="p-2 -mr-2 text-charcoal"
               >
                 {open ? (
                   <X className="w-5 h-5" strokeWidth={1.5} />
@@ -92,26 +90,35 @@ export function SiteHeader() {
         </div>
       </div>
 
-      <div className="hidden lg:block border-b border-line">
-        <div className="mx-auto max-w-[1400px] px-6 md:px-10 lg:px-14 flex justify-end py-3">
-          <SiteSearch className="w-72" />
+      {searchOpen && (
+        <div className="border-b border-line bg-ivory">
+          <div className="mx-auto max-w-[1400px] px-6 md:px-10 lg:px-14 py-4">
+            <SiteSearch autoFocus className="w-full md:w-96 md:ml-auto" />
+          </div>
         </div>
-      </div>
+      )}
 
       {open && (
-        <nav className="2xl:hidden border-b border-line bg-ivory">
-          <div className="mx-auto max-w-[1400px] px-6 flex flex-col py-4">
-            <SiteSearch className="mb-4 lg:hidden" />
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="py-3 text-[13px] tracking-[0.14em] uppercase text-charcoal border-b border-line-soft last:border-none"
-              >
-                {link.label}
-              </Link>
-            ))}
+        <nav className="border-b border-line bg-ivory">
+          <div className="mx-auto max-w-[1400px] px-6 md:px-10 lg:px-14 flex flex-col py-4">
+            {NAV_LINKS.map((link) => {
+              const active =
+                link.href !== "/#about" &&
+                (pathname === link.href ||
+                  (link.href !== "/products" && pathname?.startsWith(link.href)));
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMenuPath(null)}
+                  className={`py-3 text-[13px] tracking-[0.14em] uppercase border-b border-line-soft last:border-none ${
+                    active ? "text-oxblood" : "text-charcoal"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </div>
         </nav>
       )}

@@ -43,7 +43,7 @@ export function SiteHeader() {
               </span>
             </Link>
 
-            <nav className="hidden xl:flex items-center gap-6 2xl:gap-9">
+            <nav className="hidden 2xl:flex items-center gap-6">
               {NAV_LINKS.map((link) => {
                 const active =
                   link.href !== "/#about" &&
@@ -63,8 +63,7 @@ export function SiteHeader() {
               })}
             </nav>
 
-            <div className="flex items-center gap-5">
-              <SiteSearch className="hidden lg:block w-56 2xl:w-64" />
+            <div className="flex shrink-0 items-center gap-5">
               <Link
                 href="/cart"
                 aria-label={`Cart, ${items.length} item${items.length === 1 ? "" : "s"}`}
@@ -80,7 +79,7 @@ export function SiteHeader() {
               <button
                 aria-label={open ? "Close menu" : "Open menu"}
                 onClick={() => setOpen((v) => !v)}
-                className="xl:hidden p-2 -mr-2 text-charcoal"
+                className="2xl:hidden p-2 -mr-2 text-charcoal"
               >
                 {open ? (
                   <X className="w-5 h-5" strokeWidth={1.5} />
@@ -93,8 +92,14 @@ export function SiteHeader() {
         </div>
       </div>
 
+      <div className="hidden lg:block border-b border-line">
+        <div className="mx-auto max-w-[1400px] px-6 md:px-10 lg:px-14 flex justify-end py-3">
+          <SiteSearch className="w-72" />
+        </div>
+      </div>
+
       {open && (
-        <nav className="xl:hidden border-b border-line bg-ivory">
+        <nav className="2xl:hidden border-b border-line bg-ivory">
           <div className="mx-auto max-w-[1400px] px-6 flex flex-col py-4">
             <SiteSearch className="mb-4 lg:hidden" />
             {NAV_LINKS.map((link) => (

@@ -77,7 +77,7 @@ export function SiteHeader() {
                 aria-label={open ? "Close menu" : "Open menu"}
                 aria-expanded={open}
                 onClick={() => setMenuPath(open ? null : pathname)}
-                className="p-2 -mr-2 text-charcoal"
+                className="p-2 -mr-2 text-charcoal xl:hidden"
               >
                 {open ? (
                   <X className="w-5 h-5" strokeWidth={1.5} />
@@ -87,6 +87,25 @@ export function SiteHeader() {
               </button>
             </div>
           </div>
+          <nav className="hidden xl:flex flex-wrap justify-center gap-x-7 gap-y-2 border-t border-line-soft py-3">
+            {NAV_LINKS.map((link) => {
+              const active =
+                link.href !== "/#about" &&
+                (pathname === link.href ||
+                  (link.href !== "/products" && pathname?.startsWith(link.href)));
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`link-underline text-[12px] tracking-[0.14em] uppercase transition-colors ${
+                    active ? "text-oxblood" : "text-charcoal hover:text-bronze-dark"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
         </div>
       </div>
 

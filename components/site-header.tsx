@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Menu, ShoppingCart, X } from "lucide-react";
 import { CATEGORIES } from "@/lib/categories";
 import { useCart } from "@/components/cart-provider";
+import { SiteSearch } from "@/components/site-search";
 
 const NAV_LINKS = [
   { href: "/products", label: "All Products" },
@@ -63,6 +64,7 @@ export function SiteHeader() {
             </nav>
 
             <div className="flex items-center gap-5">
+              <SiteSearch className="hidden lg:block w-56 2xl:w-64" />
               <Link
                 href="/cart"
                 aria-label={`Cart, ${items.length} item${items.length === 1 ? "" : "s"}`}
@@ -94,6 +96,7 @@ export function SiteHeader() {
       {open && (
         <nav className="xl:hidden border-b border-line bg-ivory">
           <div className="mx-auto max-w-[1400px] px-6 flex flex-col py-4">
+            <SiteSearch className="mb-4 lg:hidden" />
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}

@@ -13,22 +13,30 @@ export const metadata: Metadata = {
 export default async function AllProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; q?: string }>;
 }) {
-  const { page: pageParam } = await searchParams;
+  const { page: pageParam, q: queryParam } = await searchParams;
   const page = Math.max(1, Number(pageParam) || 1);
-  const { products, totalPages } = await getProductsPage({ page });
+  const query = queryParam?.trim().slice(0, 100) ?? "";
+  const { products, totalPages, totalCount } = await getProductsPage({ page, query });
+
+  const basePath = query ? `/products?q=${encodeURIComponent(query)}` : "/products";
 
   return (
     <div>
       <section className="border-b border-line py-14 md:py-20">
         <Container>
           <p className="text-[11px] tracking-[0.24em] uppercase text-bronze-dark mb-3">
-            The Full Collection
+            {query ? "Search" : "The Full Collection"}
           </p>
           <h1 className="font-serif-display text-4xl md:text-[3rem] text-charcoal max-w-2xl">
-            All Products
+            {query ? `Results for “${query}”` : "All Products"}
           </h1>
+          {query && (
+            <p className="mt-4 text-[13px] text-charcoal-soft">
+              {totalCount} {totalCount === 1 ? "piece" : "pieces"} found
+            </p>
+          )}
         </Container>
       </section>
 
@@ -36,7 +44,9 @@ export default async function AllProductsPage({
         <Container>
           {products.length === 0 ? (
             <p className="text-charcoal-soft text-sm">
-              New treasures are on their way — please check back soon.
+              {query
+                ? "Nothing matched that search. Try a different word, or browse the full collection."
+                : "New treasures are on their way — please check back soon."}
             </p>
           ) : (
             <>
@@ -45,7 +55,7 @@ export default async function AllProductsPage({
                   <ProductCard key={p.slug} product={p} priority={i < 4} />
                 ))}
               </div>
-              <Pagination page={page} totalPages={totalPages} basePath="/products" />
+              <Pagination page={page} totalPages={totalPages} basePath={basePath} />
             </>
           )}
         </Container>

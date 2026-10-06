@@ -55,13 +55,25 @@ export async function getProductsPage({
   category,
   page = 1,
   pageSize = PRODUCTS_PAGE_SIZE,
+  query,
 }: {
   category?: Category;
   page?: number;
   pageSize?: number;
+  query?: string;
 }) {
   // Draft (unpublished) items never appear in public listings, at any page.
-  const where: Prisma.ProductWhereInput = category ? { category, published: true } : { published: true };
+  const q = query?.trim().slice(0, 100);
+  const where: Prisma.ProductWhereInput = {
+    published: true,
+    ...(category && { category }),
+    ...(q && {
+      OR: [
+        { name: { contains: q, mode: "insensitive" } },
+        { description: { contains: q, mode: "insensitive" } },
+      ],
+    }),
+  };
 
   // Resolve the total count first so an out-of-range page (e.g. someone
   // editing ?page=99 by hand) clamps to the real last page instead of

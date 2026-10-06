@@ -30,6 +30,11 @@ export type ProductFormInitial = {
   images: { id: string; url: string }[];
 };
 
+const SHIPPING_PRESETS = [
+  { label: "Small", dollars: "16.90" },
+  { label: "Medium", dollars: "39.80" },
+];
+
 const EXTENSIONS: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/png": "png",
@@ -55,6 +60,9 @@ export function ProductForm({
   const [removedIds, setRemovedIds] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
   const [needsShippingQuote, setNeedsShippingQuote] = useState(initial?.needsShippingQuote ?? false);
+  const [shippingInput, setShippingInput] = useState(
+    initial ? (initial.shippingCents / 100).toFixed(2) : ""
+  );
 
   const toggleRemove = (id: string) => {
     setRemovedIds((prev) => {
@@ -178,16 +186,32 @@ export function ProductForm({
             defaultValue={initial ? (initial.priceCents / 100).toFixed(2) : undefined}
           />
 
-          <Field
-            label="Shipping Price (USD)"
-            name="shippingDollars"
-            type="number"
-            min="0"
-            step="0.01"
-            required
-            disabled={needsShippingQuote}
-            defaultValue={initial ? (initial.shippingCents / 100).toFixed(2) : undefined}
-          />
+          <div>
+            <Field
+              label="Shipping Price (USD)"
+              name="shippingDollars"
+              type="number"
+              min="0"
+              step="0.01"
+              required
+              disabled={needsShippingQuote}
+              value={shippingInput}
+              onChange={(e) => setShippingInput(e.target.value)}
+            />
+            <div className="mt-2 flex gap-2">
+              {SHIPPING_PRESETS.map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  disabled={needsShippingQuote}
+                  onClick={() => setShippingInput(preset.dollars)}
+                  className="border border-line px-3 py-1.5 text-[11px] tracking-[0.08em] uppercase text-charcoal hover:border-bronze-dark disabled:opacity-40"
+                >
+                  {preset.label} {preset.dollars}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         <label className="flex items-start gap-2 text-[13px] text-charcoal">

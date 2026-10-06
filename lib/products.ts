@@ -67,12 +67,7 @@ export async function getProductsPage({
   const where: Prisma.ProductWhereInput = {
     published: true,
     ...(category && { category }),
-    ...(q && {
-      OR: [
-        { name: { contains: q, mode: "insensitive" } },
-        { description: { contains: q, mode: "insensitive" } },
-      ],
-    }),
+    ...(q && { name: { contains: q, mode: "insensitive" } }),
   };
 
   // Resolve the total count first so an out-of-range page (e.g. someone

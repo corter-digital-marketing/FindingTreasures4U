@@ -4,6 +4,7 @@ import "./globals.css";
 import { CartProvider } from "@/components/cart-provider";
 import { SITE_URL } from "@/lib/site";
 import { STORE_ADDRESS, STORE_EMAIL, STORE_PHONE } from "@/lib/store";
+import { Analytics } from "@vercel/analytics/next";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -79,6 +80,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
         />
         <CartProvider>{children}</CartProvider>
+        <Analytics />
       </body>
     </html>
   );

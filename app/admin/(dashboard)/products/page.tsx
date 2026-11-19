@@ -12,16 +12,18 @@ const PAGE_SIZE = 50;
 export default async function AdminProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; status?: string; page?: string }>;
+  searchParams: Promise<{ category?: string; status?: string; page?: string; q?: string }>;
 }) {
-  const { category: categorySlug, status, page: pageParam } = await searchParams;
+  const { category: categorySlug, status, page: pageParam, q: queryParam } = await searchParams;
   const activeCategory = categorySlug ? categoryBySlug(categorySlug) : undefined;
   const activeStatus = status === "draft" || status === "published" ? status : undefined;
   const page = Math.max(1, Number(pageParam) || 1);
+  const query = queryParam?.trim().slice(0, 100) ?? "";
 
   const where: Prisma.ProductWhereInput = {
     ...(activeCategory ? { category: activeCategory.value } : {}),
     ...(activeStatus ? { published: activeStatus === "published" } : {}),
+    ...(query && { name: { contains: query, mode: "insensitive" } }),
   };
 
   const [products, totalCount, draftCount] = await Promise.all([
@@ -37,9 +39,14 @@ export default async function AdminProductsPage({
   ]);
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
-  const params = new URLSearchParams();
-  if (activeCategory) params.set("category", activeCategory.slug);
-  if (activeStatus) params.set("status", activeStatus);
+  const filterParams = new URLSearchParams();
+  if (activeCategory) filterParams.set("category", activeCategory.slug);
+  if (activeStatus) filterParams.set("status", activeStatus);
+  const clearSearchHref =
+    filterParams.size > 0 ? `/admin/products?${filterParams.toString()}` : "/admin/products";
+
+  const params = new URLSearchParams(filterParams);
+  if (query) params.set("q", query);
   const basePath = params.size > 0 ? `/admin/products?${params.toString()}` : "/admin/products";
 
   return (
@@ -62,10 +69,30 @@ export default async function AdminProductsPage({
         </Link>
       </div>
 
+      <form action="/admin/products" method="get" className="mb-6 max-w-sm">
+        {activeCategory && <input type="hidden" name="category" value={activeCategory.slug} />}
+        {activeStatus && <input type="hidden" name="status" value={activeStatus} />}
+        <input
+          type="search"
+          name="q"
+          defaultValue={query}
+          placeholder="Search products by name…"
+          className="w-full border-0 border-b border-line bg-transparent py-2 text-[14px] text-charcoal placeholder:text-charcoal-soft/70 outline-none transition-colors focus:border-bronze-dark"
+        />
+      </form>
+      {query && (
+        <p className="-mt-4 mb-6 text-[12px] text-charcoal-soft">
+          {totalCount} result{totalCount === 1 ? "" : "s"} for &ldquo;{query}&rdquo; —{" "}
+          <Link href={clearSearchHref} className="link-underline text-charcoal">
+            Clear
+          </Link>
+        </p>
+      )}
+
       {draftCount > 0 && (
         <div className="flex flex-wrap items-center gap-2 mb-3">
           <Link
-            href="/admin/products?status=draft"
+            href={`/admin/products?status=draft${query ? `&q=${encodeURIComponent(query)}` : ""}`}
             className={`px-4 py-2 text-[12px] uppercase tracking-[0.08em] border transition-colors ${
               activeStatus === "draft"
                 ? "border-bronze-dark bg-bronze-dark text-ivory"
@@ -76,7 +103,7 @@ export default async function AdminProductsPage({
           </Link>
           {activeStatus === "draft" && (
             <Link
-              href="/admin/products"
+              href={query ? `/admin/products?q=${encodeURIComponent(query)}` : "/admin/products"}
               className="text-[12px] text-charcoal-soft hover:text-charcoal link-underline"
             >
               Clear filter
@@ -86,7 +113,7 @@ export default async function AdminProductsPage({
       )}
       <div className="flex flex-wrap items-center gap-2 mb-10">
         <Link
-          href="/admin/products"
+          href={query ? `/admin/products?q=${encodeURIComponent(query)}` : "/admin/products"}
           className={`px-4 py-2 text-[12px] uppercase tracking-[0.08em] border transition-colors ${
             !activeCategory && !activeStatus
               ? "border-charcoal bg-charcoal text-ivory"
@@ -98,7 +125,7 @@ export default async function AdminProductsPage({
         {CATEGORIES.map((c) => (
           <Link
             key={c.slug}
-            href={`/admin/products?category=${c.slug}${activeStatus ? `&status=${activeStatus}` : ""}`}
+            href={`/admin/products?category=${c.slug}${activeStatus ? `&status=${activeStatus}` : ""}${query ? `&q=${encodeURIComponent(query)}` : ""}`}
             className={`px-4 py-2 text-[12px] uppercase tracking-[0.08em] border transition-colors ${
               activeCategory?.slug === c.slug
                 ? "border-charcoal bg-charcoal text-ivory"
@@ -112,9 +139,11 @@ export default async function AdminProductsPage({
 
       {products.length === 0 ? (
         <p className="text-[13px] text-charcoal-soft">
-          {activeCategory
-            ? `No ${activeCategory.label.toLowerCase()} yet.`
-            : 'No products yet. Click "Add Product" to publish your first piece.'}
+          {query
+            ? `No products match "${query}".`
+            : activeCategory
+              ? `No ${activeCategory.label.toLowerCase()} yet.`
+              : 'No products yet. Click "Add Product" to publish your first piece.'}
         </p>
       ) : (
         <>

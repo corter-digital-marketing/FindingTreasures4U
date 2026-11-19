@@ -16,26 +16,32 @@ export default async function AdminProductsPage({
 }) {
   const { category: categorySlug, status, page: pageParam, q: queryParam } = await searchParams;
   const activeCategory = categorySlug ? categoryBySlug(categorySlug) : undefined;
-  const activeStatus = status === "draft" || status === "published" ? status : undefined;
+  const activeStatus =
+    status === "draft" || status === "published" || status === "sold" ? status : undefined;
   const page = Math.max(1, Number(pageParam) || 1);
   const query = queryParam?.trim().slice(0, 100) ?? "";
 
   const where: Prisma.ProductWhereInput = {
     ...(activeCategory ? { category: activeCategory.value } : {}),
-    ...(activeStatus ? { published: activeStatus === "published" } : {}),
+    ...(activeStatus === "sold"
+      ? { sold: true }
+      : activeStatus
+        ? { published: activeStatus === "published" }
+        : {}),
     ...(query && { name: { contains: query, mode: "insensitive" } }),
   };
 
-  const [products, totalCount, draftCount] = await Promise.all([
+  const [products, totalCount, draftCount, soldCount] = await Promise.all([
     prisma.product.findMany({
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: activeStatus === "sold" ? { updatedAt: "desc" } : { createdAt: "desc" },
       include: { images: { orderBy: { position: "asc" }, take: 1 } },
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
     }),
     prisma.product.count({ where }),
     prisma.product.count({ where: { published: false } }),
+    prisma.product.count({ where: { sold: true } }),
   ]);
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
@@ -102,6 +108,28 @@ export default async function AdminProductsPage({
             Drafts ({draftCount}) — hidden from customers
           </Link>
           {activeStatus === "draft" && (
+            <Link
+              href={query ? `/admin/products?q=${encodeURIComponent(query)}` : "/admin/products"}
+              className="text-[12px] text-charcoal-soft hover:text-charcoal link-underline"
+            >
+              Clear filter
+            </Link>
+          )}
+        </div>
+      )}
+      {soldCount > 0 && (
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          <Link
+            href={`/admin/products?status=sold${query ? `&q=${encodeURIComponent(query)}` : ""}`}
+            className={`px-4 py-2 text-[12px] uppercase tracking-[0.08em] border transition-colors ${
+              activeStatus === "sold"
+                ? "border-charcoal bg-charcoal text-ivory"
+                : "border-line text-charcoal-soft hover:border-bronze-dark hover:text-charcoal"
+            }`}
+          >
+            Sold ({soldCount})
+          </Link>
+          {activeStatus === "sold" && (
             <Link
               href={query ? `/admin/products?q=${encodeURIComponent(query)}` : "/admin/products"}
               className="text-[12px] text-charcoal-soft hover:text-charcoal link-underline"

@@ -1,15 +1,22 @@
 import Link from "next/link";
+import NextImage from "next/image";
 import { ArrowUpRight, Plus } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatPrice, formatDate } from "@/lib/format";
 import { PAID_ORDERS_WHERE } from "@/lib/orders";
 
 export default async function AdminDashboardPage() {
-  const [totalProducts, activeProducts, soldProducts, recentOrders] = await Promise.all([
+  const [totalProducts, activeProducts, soldProducts, recentOrders, recentSold] = await Promise.all([
     prisma.product.count(),
     prisma.product.count({ where: { sold: false } }),
     prisma.product.count({ where: { sold: true } }),
     prisma.order.findMany({ where: PAID_ORDERS_WHERE, orderBy: { createdAt: "desc" }, take: 5 }),
+    prisma.product.findMany({
+      where: { sold: true },
+      orderBy: { updatedAt: "desc" },
+      take: 5,
+      include: { images: { orderBy: { position: "asc" }, take: 1 } },
+    }),
   ]);
 
   const stats = [
@@ -75,6 +82,49 @@ export default async function AdminDashboardPage() {
                 </span>
                 <span className="text-charcoal tabular-nums">{formatPrice(order.totalCents)}</span>
               </div>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between mb-5 mt-12">
+        <h2 className="font-serif-display text-xl text-charcoal">Recently Sold Pieces</h2>
+        <Link
+          href="/admin/products?status=sold"
+          className="link-underline text-[12px] uppercase tracking-[0.1em] text-charcoal-soft flex items-center gap-1"
+        >
+          View All <ArrowUpRight className="w-3.5 h-3.5" strokeWidth={1.5} />
+        </Link>
+      </div>
+
+      {recentSold.length === 0 ? (
+        <p className="text-[13px] text-charcoal-soft">No pieces marked sold yet.</p>
+      ) : (
+        <div className="border border-line divide-y divide-line bg-paper">
+          {recentSold.map((product) => (
+            <Link
+              key={product.id}
+              href={`/admin/products/${product.id}/edit`}
+              className="flex items-center gap-4 px-5 py-4 hover:bg-ivory-dim transition-colors"
+            >
+              <div className="relative w-12 h-12 shrink-0 bg-ivory-dim">
+                {product.images[0] && (
+                  <NextImage
+                    src={product.images[0].url}
+                    alt=""
+                    fill
+                    sizes="48px"
+                    className="object-cover"
+                  />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] text-charcoal truncate">{product.name}</p>
+                <p className="text-[12px] text-charcoal-soft mt-0.5">{formatDate(product.updatedAt)}</p>
+              </div>
+              <span className="text-[13px] text-charcoal tabular-nums shrink-0">
+                {formatPrice(product.priceCents)}
+              </span>
             </Link>
           ))}
         </div>

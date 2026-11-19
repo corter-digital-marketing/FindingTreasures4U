@@ -57,3 +57,6 @@ next-env.d.ts
 
 # raw uploaded video source (the optimized version lives in /public/video)
 /video
+
+# raw bulk-import spreadsheet exports (Zophi), not a web asset
+/Spreadsheet
